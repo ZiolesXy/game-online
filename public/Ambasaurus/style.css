@@ -1,0 +1,150 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    background: url(background-ingame.jpg) no-repeat center;
+    background-size: cover;
+}
+
+#box {
+    width: 900px;
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+}
+
+#box #roadContainer {
+    height: 30px;
+    width: 1200px;
+    position: absolute;
+    bottom: 32px;
+}
+
+#box #roadContainer img {
+    height: 30px;
+    width: 2000px;
+    position: absolute;
+    left: 0;
+    animation: road 3s infinite linear;
+}
+
+#dino {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 103px;
+    left: 90px;
+    z-index: 2;
+}
+
+#cactus {
+    width: 50px;
+    height: 50px;
+    position: relative;
+    top: 103px;
+    left: 850px;
+    animation: cactus 1s infinite linear;
+    z-index: 2;
+}
+
+@keyframes cactus {
+    0% {
+        left: 800px;
+    }
+
+    100% {
+        left: -20px;
+    }
+}
+
+@keyframes road {
+    0% {
+        left: 0;
+    }
+
+    100% {
+        left: -800px;
+    }
+}
+
+.animate {
+    animation: jump 500ms infinite;
+}
+
+@keyframes jump {
+    0% {
+        top: 103px;
+    }
+
+    30% {
+        top: 53px;
+    }
+
+    70% {
+        top: 53px;
+    }
+
+    100% {
+        top: 103px;
+    }
+}
+
+#warning-message {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 24px;
+    text-align: center;
+    padding-top: 100px;
+}
+
+.btn-style {
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    border-radius: 50%;
+}
+
+.buton {
+    display: flex;
+}
+
+.score-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 900px;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.score-container .score,
+.score-container .highscore,
+.score-container .lives {
+    margin-right: 10px;
+}
+
+.score {
+    color: white;
+}
+
+.highscore {
+    color: yellow;
+}
+
+.lives {
+    color: red;
+}

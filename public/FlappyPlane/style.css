@@ -1,0 +1,102 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: Arial, Helvetica, sans-serif;
+}
+.background {
+	height: 100vh;
+	width: 100vw;
+	background: url('images/mainbg.jpg') no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+.bird {
+	width: 200px;
+	position: fixed;
+	top: 40vh;
+	left: 30vw;
+	z-index: 100;
+}
+.pipe_sprite {
+	position: fixed;
+	top: 40vh;
+	left: 100vw;
+	height: 55vh;
+	width: 6vw;
+	background:url("images/gedung.png");
+}
+.message {
+	position: absolute;
+	z-index: 10;
+	color: #ffffff;
+	top: 50%;
+	left: 50%;
+	font-size: 3em;
+	transform: translate(-50%, -50%);
+	text-align: center;
+
+}
+.messageStyle{
+	background: rgba(0, 0, 0, 0.5);
+	padding: 30px;
+	box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+	border-radius: 5%;
+	margin-top: 10px;
+
+}
+.score {
+	position: fixed;
+	z-index: 10;
+	height: 10vh;
+	font-size: 10vh;
+	font-weight: bold;
+	color: black;
+	-webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: black;
+	top: 0;
+	left: 0;
+	margin: 10px;
+	font-family: Arial, Helvetica, sans-serif;
+}
+.score_val {
+	color: gold;
+	font-weight: bold;
+}
+
+
+
+@media only screen and (orientation: landscape) and (max-width: 900px) {
+    .message{
+        font-size: 1.5em;
+		font-weight: bold;
+    }
+
+    .messageStyle{
+        width: fit-content;
+		height: fit-content;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .score{
+        font-size: 2rem;
+    }
+
+    .pipe_sprite{
+        width: 14vw;
+    }
+
+    .bird{
+        width: 150px;
+        left: 20vw;
+    }
+
+	.body{
+		height: fit-content;
+	}
+}
