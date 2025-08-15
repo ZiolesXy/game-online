@@ -1,7 +1,11 @@
 import React, { useRef, useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import Button from "../components/Button";
+import { FriendsModal } from "../components/FriendsModal";
+import { ChatModal } from "../components/ChatModal";
+import { ProfileMenu } from "../components/ProfileMenu";
 import type { Game } from "../data/game";
+import type { ConversationWithUser } from "../lib/supabase";
 
 const PlayGame: React.FC<{ game: Game; onBack: () => void }> = ({
   game,
@@ -10,6 +14,9 @@ const PlayGame: React.FC<{ game: Game; onBack: () => void }> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showFriendsModal, setShowFriendsModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [selectedConversation, setSelectedConversation] = useState<ConversationWithUser | null>(null);
 
   const onFullscreen = () => {
     if (iframeRef.current) {
@@ -35,6 +42,31 @@ const PlayGame: React.FC<{ game: Game; onBack: () => void }> = ({
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
+
+  const handleStartChat = (conversation: ConversationWithUser) => {
+    setSelectedConversation(conversation);
+    setShowFriendsModal(false);
+    setShowChatModal(true);
+  };
+
+  const handleCloseFriendsModal = () => {
+    setShowFriendsModal(false);
+  };
+
+  const handleCloseChatModal = () => {
+    setShowChatModal(false);
+    setSelectedConversation(null);
+  };
+
+  const handleNavigateToProfile = () => {
+    // Navigate to profile section - you can implement routing here
+    console.log('Navigate to profile');
+  };
+
+  const handleNavigateToDashboard = () => {
+    // Navigate to dashboard - you can implement routing here
+    onBack(); // For now, use the existing back function
+  };
 
   // Icons for buttons
   const BackIcon = () => (
@@ -67,7 +99,7 @@ const PlayGame: React.FC<{ game: Game; onBack: () => void }> = ({
                 🎮
               </div>
               <div>
-                <h1 className="text-4xl font-black gradient-text">{game.title}</h1>
+                <h1 className="text-4xl font-black text-gray-100">{game.title}</h1>
                 <p className="text-gray-400 text-sm">by {game.author}</p>
               </div>
             </div>
@@ -161,7 +193,46 @@ const PlayGame: React.FC<{ game: Game; onBack: () => void }> = ({
             💡 <strong>Tips:</strong> Gunakan tombol Fullscreen untuk pengalaman bermain yang lebih immersive
           </p>
         </div>
+
+        {/* Friends Button */}
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => setShowFriendsModal(true)}
+            className="glass-effect px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600/20 to-purple-600/20 hover:from-blue-600/30 hover:to-purple-600/30 border border-white/20 hover:border-white/30 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                </svg>
+              </div>
+              <div className="text-left">
+                <h3 className="text-lg font-bold text-gray-100">Friends</h3>
+                <p className="text-sm text-gray-400">Chat with your friends</p>
+              </div>
+            </div>
+          </button>
+        </div>
       </div>
+
+      {/* Modals */}
+      <FriendsModal
+        isOpen={showFriendsModal}
+        onClose={handleCloseFriendsModal}
+        onStartChat={handleStartChat}
+      />
+
+      <ChatModal
+        isOpen={showChatModal}
+        onClose={handleCloseChatModal}
+        conversation={selectedConversation}
+      />
+
+      {/* Profile Menu - Bottom Right Corner */}
+      <ProfileMenu
+        onNavigateToProfile={handleNavigateToProfile}
+        onNavigateToDashboard={handleNavigateToDashboard}
+      />
     </Layout>
   );
 };
