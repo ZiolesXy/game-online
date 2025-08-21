@@ -34,8 +34,13 @@ function mapAuthErrorMessage(rawMessage: string): string {
     msg.includes('user already registered') ||
     msg.includes('already registered') ||
     msg.includes('already exists') ||
+    msg.includes('user already exists') ||
+    msg.includes('email already exists') ||
+    msg.includes('email is already in use') ||
+    msg.includes('email address is already in use') ||
     msg.includes('duplicate key value') ||
-    msg.includes('email address is already in use')
+    msg.includes('unique constraint') ||
+    msg.includes('duplicate')
   ) {
     return 'Email sudah terdaftar. Silakan masuk.'
   }
@@ -50,9 +55,37 @@ function mapAuthErrorMessage(rawMessage: string): string {
 }
 
 export class AuthService {
+  // Check if email already exists in users table
+  static async emailExists(email: string): Promise<boolean> {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .limit(1)
+
+      if (error) {
+        // If policy blocks access, assume not exists to avoid false positives
+        console.warn('emailExists check error:', error)
+        return false
+      }
+
+      return Array.isArray(data) && data.length > 0
+    } catch (e) {
+      console.warn('emailExists exception:', e)
+      return false
+    }
+  }
+
   // Sign up new user
   static async signUp({ email, password, username, fullName }: SignUpData) {
     try {
+      // Pre-check: prevent registering an already-registered email
+      const exists = await AuthService.emailExists(email)
+      if (exists) {
+        return { user: null, error: 'Email sudah terdaftar. Silakan masuk.' }
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -65,6 +98,13 @@ export class AuthService {
       })
 
       if (error) throw error
+
+      // Supabase behavior: when signing up with an existing email, it may return a user
+      // with empty identities array and no error. Treat this as already registered.
+      const identities = (data as any)?.user?.identities
+      if (Array.isArray(identities) && identities.length === 0) {
+        return { user: null, error: 'Email sudah terdaftar. Silakan masuk.' }
+      }
 
       return { user: data.user, error: null }
     } catch (error: any) {
@@ -147,7 +187,7 @@ export class AuthService {
 
   // Listen to auth state changes
   static onAuthStateChange(callback: (user: any) => void) {
-    return supabase.auth.onAuthStateChange((event, session) => {
+    return supabase.auth.onAuthStateChange((_event, session) => {
       callback(session?.user || null)
     })
   }

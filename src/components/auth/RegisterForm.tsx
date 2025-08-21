@@ -15,6 +15,7 @@ export function RegisterForm({ onToggleMode }: RegisterFormProps) {
     fullName: ''
   })
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -22,6 +23,7 @@ export function RegisterForm({ onToggleMode }: RegisterFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setSuccess('')
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
@@ -49,8 +51,17 @@ export function RegisterForm({ onToggleMode }: RegisterFormProps) {
     
     if (error) {
       setError(error)
+    } else {
+      // Registration succeeded; prompt user to verify email
+      setSuccess('Akun berhasil dibuat. Silakan cek email Anda untuk verifikasi sebelum masuk.')
+      // Optional: clear sensitive fields
+      setFormData(prev => ({
+        ...prev,
+        password: '',
+        confirmPassword: ''
+      }))
     }
-    
+
     setLoading(false)
   }
 
@@ -95,7 +106,38 @@ export function RegisterForm({ onToggleMode }: RegisterFormProps) {
                 <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                {error}
+                <span className="mr-2">{error}</span>
+                {(() => {
+                  const em = (error || '').toLowerCase()
+                  const already = em.includes('sudah terdaftar') || em.includes('already registered') || em.includes('already exists') || em.includes('in use') || em.includes('duplicate')
+                  return already
+                })() && (
+                  <button
+                    type="button"
+                    onClick={onToggleMode}
+                    className="ml-auto text-red-200 underline decoration-2 underline-offset-2 hover:text-white"
+                  >
+                    Masuk sekarang
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {success && (
+            <div className="bg-green-500/20 border border-green-500/50 text-green-100 px-4 py-3 rounded-lg mb-6 backdrop-blur-sm">
+              <div className="flex items-center">
+                <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="mr-2">{success}</span>
+                <button
+                  type="button"
+                  onClick={onToggleMode}
+                  className="ml-auto text-green-200 underline decoration-2 underline-offset-2 hover:text-white"
+                >
+                  Pergi ke Login
+                </button>
               </div>
             </div>
           )}
