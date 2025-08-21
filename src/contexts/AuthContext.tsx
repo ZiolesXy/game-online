@@ -113,16 +113,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []) // Remove isUpdatingProfile from dependencies to prevent re-runs
 
   const signUp = async (email: string, password: string, username: string, fullName?: string) => {
-    setLoading(true)
+    // Do not toggle global loading here to prevent app-wide loading screen
+    // Let RegisterForm manage its own local loading state
     const { error } = await AuthService.signUp({ email, password, username, fullName })
-    setLoading(false)
     return { error }
   }
 
   const signIn = async (email: string, password: string) => {
-    setLoading(true)
+    // Do not toggle global loading here to prevent app-wide loading screen
+    // Let LoginForm manage its own local loading state
     const { error } = await AuthService.signIn({ email, password })
-    setLoading(false)
     return { error }
   }
 

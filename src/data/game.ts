@@ -23,24 +23,24 @@ export const GAME_CATEGORIES = [
 export type GameCategory = typeof GAME_CATEGORIES[number];
 
 export const games: Game[] = [
-  {
-    id: "tictactoe",
-    title: "Tic Tac Toe",
-    description: "Mainkan game klasik Tic Tac Toe melawan teman!",
-    file: "/TicTacToe/tictactoe.html",
-    thumbnail: DEFAULT_THUMBNAIL,
-    author: "Nama Pembuat TicTacToe",
-    category: "Strategi",
-  },
-  {
-    id: "FP",
-    title: "Flappy Plane",
-    description: "Terbangkan pesawat dan hindari rintangan!",
-    file: "/FlappyPlane/flappyplane.html",
-    thumbnail: "/FlappyPlane/images/gedung.png",
-    author: "Arsya Briliant Perdana, Fahri Ramadan Gani, Rafif Dzaki Akmal, Vylan Yoza Sinaga",
-    category: "Arcade",
-  },
+  // {
+  //   id: "tictactoe",
+  //   title: "Tic Tac Toe",
+  //   description: "Mainkan game klasik Tic Tac Toe melawan teman!",
+  //   file: "/TicTacToe/tictactoe.html",
+  //   thumbnail: DEFAULT_THUMBNAIL,
+  //   author: "Nama Pembuat TicTacToe",
+  //   category: "Strategi",
+  // },
+  // {
+  //   id: "FP",
+  //   title: "Flappy Plane",
+  //   description: "Terbangkan pesawat dan hindari rintangan!",
+  //   file: "/FlappyPlane/flappyplane.html",
+  //   thumbnail: "/FlappyPlane/images/gedung.png",
+  //   author: "Arsya Briliant Perdana, Fahri Ramadan Gani, Rafif Dzaki Akmal, Vylan Yoza Sinaga",
+  //   category: "Arcade",
+  // },
   {
     id: "NH",
     title: "Nightmare House",
@@ -50,14 +50,14 @@ export const games: Game[] = [
     author: "Skibidi Team",
     category: "Horor",
   },
-  {
-    id: "AS",
-    title: "Ambasaurus",
-    description: "Mainkan Amba Sang dinosaurus untuk berlari menuju gurun",
-    file: "/Ambasaurus/index.html",
-    thumbnail: "/Ambasaurus/dino.png",
-    author: "VoksiDoksi Right Side",
-    category: "Aksi",
-  },
+  // {
+  //   id: "AS",
+  //   title: "Ambasaurus",
+  //   description: "Mainkan Amba Sang dinosaurus untuk berlari menuju gurun",
+  //   file: "/Ambasaurus/index.html",
+  //   thumbnail: "/Ambasaurus/dino.png",
+  //   author: "VoksiDoksi Right Side",
+  //   category: "Aksi",
+  // },
   // Tambahkan game lain nanti di sini
 ];

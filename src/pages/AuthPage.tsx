@@ -31,7 +31,7 @@ export function AuthPage() {
               <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full animate-pulse"></div>
             </div>
           </div>
-          <h1 className="text-4xl font-black gradient-text mb-2">Game Center</h1>
+          <h1 className="text-4xl font-black">Game Center</h1>
           <p className="text-xl text-gray-400 font-medium">Masuk ke dunia gaming terbaik</p>
         </div>
 
