@@ -7,9 +7,10 @@ import { ProfileMenu } from "../components/ProfileMenu";
 import type { Game } from "../data/game";
 import type { ConversationWithUser } from "../lib/supabase";
 
-const PlayGame: React.FC<{ game: Game; onBack: () => void }> = ({
+const PlayGame: React.FC<{ game: Game; onBack: () => void; onOpenDashboard?: () => void }> = ({
   game,
   onBack,
+  onOpenDashboard,
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -59,8 +60,8 @@ const PlayGame: React.FC<{ game: Game; onBack: () => void }> = ({
   };
 
   const handleNavigateToProfile = () => {
-    // Navigate to profile section - you can implement routing here
-    console.log('Navigate to profile');
+    // Open the same Dashboard/Profile view as the top-right button in App
+    onOpenDashboard?.();
   };
 
   const handleNavigateToDashboard = () => {

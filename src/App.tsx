@@ -65,7 +65,11 @@ function AppContent() {
   if (selectedGame) {
     return (
       <div className="relative">
-        <PlayGame game={selectedGame} onBack={() => setSelectedGame(null)} />
+        <PlayGame 
+          game={selectedGame} 
+          onBack={() => setSelectedGame(null)} 
+          onOpenDashboard={() => setShowDashboard(true)}
+        />
         
         
       </div>

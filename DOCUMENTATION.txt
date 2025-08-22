@@ -1,0 +1,92 @@
+Fun Zone - Documentation (Plain Text)
+
+1) Overview
+- Social gaming platform with authentication, friends, chat, and web-embedded games.
+- Stack: React + TypeScript + Vite + Tailwind + Supabase.
+
+2) Requirements
+- Node.js LTS + npm
+- Supabase account (https://supabase.com)
+
+3) Clone & Install
+- Clone repository
+- Install dependencies:
+  npm install
+
+4) (Optional) Manual Install From Empty Project
+- App deps:
+  npm i react react-dom react-router-dom classnames @heroicons/react @supabase/supabase-js chess.js libsodium-wrappers
+- Dev deps & tooling:
+  npm i -D vite @vitejs/plugin-react typescript @types/react @types/react-dom tailwindcss @tailwindcss/vite postcss autoprefixer eslint @eslint/js typescript-eslint eslint-plugin-react-hooks eslint-plugin-react-refresh
+- Supabase CLI (optional):
+  npm i -D supabase
+  or global: npm i -g supabase
+
+5) Environment Variables
+- Copy .env.example to .env
+- Fill values from Supabase (Settings > API):
+  VITE_SUPABASE_URL=...
+  VITE_SUPABASE_ANON_KEY=...
+
+6) Supabase Database Setup
+- Create a new project in Supabase Dashboard
+- Open SQL Editor
+- Paste and run contents of: supabase/start.sql
+  (Creates tables, RLS policies, triggers, and storage bucket "games")
+- Authentication > Settings
+  - Site URL: http://localhost:5173
+  - Redirect URLs: http://localhost:5173
+
+7) Quick Verification
+- Table Editor: users, friends, conversations, messages, games exist
+- Policies: enabled on those tables
+- Storage > Buckets: "games" exists
+- Authentication > Users: sign up via app; a row in public.users should auto-create
+- Realtime settings enabled for schema public (default usually on)
+
+8) Run (Development)
+- Start dev server:
+  npm run dev
+- App URL:
+  http://localhost:5173
+
+9) Build & Preview
+- Build production bundle:
+  npm run build
+- Preview locally:
+  npm run preview
+
+10) NPM Scripts (typical)
+- dev: start Vite dev server
+- build: build app with Vite
+- preview: preview build
+- lint (if configured): run ESLint
+
+11) Project Structure (high level)
+- index.html               : App entry
+- src/                     : Source code
+  - pages/                 : Pages (e.g., Home)
+  - components/            : UI components (auth, friends, chat, etc.)
+  - contexts/              : React contexts (Auth)
+  - data/                  : Static data (games)
+  - lib/                   : Clients (supabase)
+- public/                  : Static assets and embedded game files
+- supabase/                : SQL schema and bootstrap scripts (schema.sql, start.sql, migrations/*.sql)
+- README.md                : Full guide (Indonesian)
+
+12) Features
+- Authentication (email/password)
+- User profiles
+- Friends management (requests/accept/reject)
+- Real-time chat between friends
+- Games list and in-browser play
+- Public storage bucket for games assets
+
+13) Common Issues & Tips
+- If auth fails, check .env values and Auth settings (Site/Redirect URLs)
+- If chat is not real-time, ensure Realtime is enabled for schema public
+- If 401/permission errors, confirm RLS policies are created by running supabase/start.sql
+- Use: npm ls @supabase/supabase-js to verify client is installed
+
+14) License / Credits
+- See repository for licensing details and game attributions in public/*

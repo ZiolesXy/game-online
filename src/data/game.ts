@@ -62,7 +62,7 @@ export const games: Game[] = [
   {
     id: "BW",
     title: "Brawl",
-    description: "Mainkan Brawl melawan teman!",
+    description: "A fast paced 2-player brawler game where you just have to hit your opponent once in 50+ stages! There are weapons over the map for you to hit your opponent and beware the rising water!",
     file: "/Brawl/brawl.html",
     thumbnail: "/Brawl/brawl.p8.png",
     author: "CodeManu",
