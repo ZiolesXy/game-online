@@ -30,6 +30,40 @@ Platform sosial gaming dengan fitur autentikasi, manajemen teman, chat real‑ti
 - Node.js LTS + npm
 - Akun Supabase (https://supabase.com)
 
+## Instal Paket (opsional – jika memulai dari proyek kosong)
+
+Di repo ini, cukup jalankan: `npm install`. Semua dependensi sudah ada di `package.json`.
+
+Jika Anda memulai dari proyek kosong dan ingin menyamai setup ini, jalankan:
+
+```bash
+# Dependensi aplikasi
+npm i react react-dom react-router-dom classnames @heroicons/react \
+  @supabase/supabase-js chess.js libsodium-wrappers
+
+# Dependensi dev & tooling
+npm i -D vite @vitejs/plugin-react typescript @types/react @types/react-dom \
+  tailwindcss @tailwindcss/vite postcss autoprefixer \
+  eslint @eslint/js typescript-eslint eslint-plugin-react-hooks eslint-plugin-react-refresh
+```
+
+Tambahan khusus Supabase:
+
+```bash
+# Klien JavaScript Supabase (jika memulai dari kosong)
+npm i @supabase/supabase-js
+
+# (Opsional) Supabase CLI untuk otomasi/migrasi lokal
+# Pasang sebagai devDependency proyek
+npm i -D supabase
+# atau pasang global
+npm i -g supabase
+```
+
+Catatan CLI: Anda bisa menjalankan `npx supabase --help` untuk melihat perintah yang tersedia.
+
+Catatan: Tailwind v4 dengan plugin `@tailwindcss/vite` sudah terkonfigurasi di repo ini (`tailwind.config.ts`).
+
 ## Instalasi & Menjalankan (Dev)
 
 1) Clone & install
@@ -53,6 +87,53 @@ VITE_SUPABASE_ANON_KEY=<anon-public-key>
 - Buka SQL Editor dan jalankan isi file `supabase/start.sql`
   - Ini akan membuat tabel `public.users`, `public.friends`, `public.conversations`, `public.messages`, `public.games`, RLS policies, triggers, dan bucket storage publik `games` + kebijakannya.
   - Alternatif: jalankan bertahap mulai dari `supabase/schema.sql` lalu migrasi di `supabase/migrations/`.
+
+### Tutorial Setup Database Supabase (Langkah demi langkah)
+
+1) Buat Project Supabase
+
+- Masuk ke dashboard: https://supabase.com
+- New Project → pilih Organization → isi Nama Project dan Database Password → Create
+- Tunggu provisioning selesai
+
+2) Dapatkan kredensial API
+
+- Menu: Settings → API
+- Salin: Project URL dan anon public key → taruh di `.env` sesuai contoh di atas
+
+3) Eksekusi skema database
+
+- Menu: SQL Editor → buat query baru
+- Copy seluruh isi file `supabase/start.sql` dari repo ini
+- Klik Run
+- Hasil yang diharapkan:
+  - Tabel: `public.users`, `public.friends`, `public.conversations`, `public.messages`, `public.games`
+  - RLS aktif pada tabel tersebut dengan policies terpasang
+  - Trigger untuk `updated_at` dan auto‑profil `handle_new_user()` aktif
+  - Storage bucket `games` dibuat dengan kebijakan akses publik (read) dan unggah/update/delete untuk user login
+
+4) Atur Authentication (wajib untuk login lokal)
+
+- Menu: Authentication → Settings
+- Site URL: `http://localhost:5173`
+- Redirect URLs: tambah `http://localhost:5173`
+- Simpan perubahan
+
+5) Verifikasi cepat (opsional tapi disarankan)
+
+- Menu: Table Editor → cek tabel yang disebutkan ada dan dapat diakses
+- Menu: Authentication → Users → buat akun baru dari aplikasi, lalu lihat apakah row di `public.users` otomatis tercipta (trigger bekerja)
+- Menu: Database → Policies → cek policies pada `users`, `friends`, `conversations`, `messages`, `games`
+- Menu: Storage → Buckets → pastikan bucket `games` ada
+- Realtime: Settings → Realtime → pastikan aktif untuk schema `public` (default biasanya aktif). Chat mengandalkan `postgres_changes` pada tabel `messages` & `conversations`.
+
+6) (Alternatif) Jalankan skema inti dahulu
+
+- Jika ingin bertahap: jalankan `supabase/schema.sql`, kemudian migrasi di `supabase/migrations/` (contoh: `add_chat_feature.sql`). `start.sql` sudah mencakup semuanya secara idempotent, jadi paling praktis cukup jalankan `start.sql` saja.
+
+7) (Opsional) Supabase CLI
+
+- Anda dapat menggunakan Supabase CLI untuk otomatisasi, namun setup melalui Dashboard sudah memadai untuk pengembangan proyek ini.
 
 4) Pengaturan Auth
 
