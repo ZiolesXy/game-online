@@ -44,6 +44,10 @@
   --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.3);
   --shadow-card: 0 10px 40px rgba(0, 0, 0, 0.4);
   --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.3);
+
+  /* Backdrop blur strengths */
+  --blur-strong: 20px; /* for glass & glass-card */
+  --blur: 10px;        /* for glass-effect */
 }
 
 * {
@@ -85,8 +89,8 @@ body {
 /* Glassmorphism Utilities */
 .glass {
   background: var(--bg-glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(var(--blur-strong));
+  -webkit-backdrop-filter: blur(var(--blur-strong));
   border: 1px solid var(--border-glass);
 }
 
@@ -97,8 +101,8 @@ body {
 
 .glass-card {
   background: var(--bg-card);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(var(--blur-strong));
+  -webkit-backdrop-filter: blur(var(--blur-strong));
   border: 1px solid var(--border-glass);
   box-shadow: var(--shadow-glass);
 }
@@ -274,8 +278,8 @@ body {
 
 .glass-effect {
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
