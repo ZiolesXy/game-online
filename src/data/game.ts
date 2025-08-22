@@ -59,5 +59,14 @@ export const games: Game[] = [
   //   author: "VoksiDoksi Right Side",
   //   category: "Aksi",
   // },
+  {
+    id: "CH",
+    title: "Catur",
+    description: "Mainkan Catur melawan teman!",
+    file: "/Chess/index.html",
+    thumbnail: "/Chess/background.jpg",
+    author: "Pasha Prabasakti",
+    category: "Strategi",
+  },
   // Tambahkan game lain nanti di sini
 ];
