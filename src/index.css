@@ -63,7 +63,7 @@ body {
   padding: 0;
   min-height: 100vh;
   background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
-  background-attachment: fixed;
+  /* background-attachment: fixed; */
   overflow-x: hidden;
   color: var(--text-primary);
 }
