@@ -103,6 +103,17 @@ body {
   box-shadow: var(--shadow-glass);
 }
 
+/* Fallback when backdrop-filter is unsupported (some hosting/browser combos) */
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .glass,
+  .glass-card,
+  .glass-effect {
+    /* Slightly more opaque so content remains legible without blur */
+    background: rgba(20, 20, 35, 0.75);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
 /* Enhanced Animations */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -264,6 +275,7 @@ body {
 .glass-effect {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
