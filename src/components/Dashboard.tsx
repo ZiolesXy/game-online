@@ -74,9 +74,9 @@ export function Dashboard() {
         </div>
       </header>
 
-      {/* Navigation Tabs */}
+      {/* Navigation - Desktop Tabs */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <div className="flex justify-center">
+        <div className="hidden md:flex justify-center">
           <div className="flex bg-white/70 backdrop-blur-sm rounded-2xl p-1 shadow-lg border border-white/30">
             <button
               onClick={() => setActiveSection('profile')}
@@ -142,6 +142,83 @@ export function Dashboard() {
         </div>
       </div>
 
+      {/* Navigation - Mobile Icon Logo Menu */}
+      <div className="md:hidden px-4 pt-4">
+        <div className="grid grid-cols-4 gap-3">
+          <button
+            onClick={() => setActiveSection('profile')}
+            className={`flex flex-col items-center space-y-1 focus:outline-none ${
+              activeSection === 'profile' ? 'opacity-100' : 'opacity-80'
+            }`}
+          >
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg border border-white/20 transition-all ${
+              activeSection === 'profile'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 scale-105'
+                : 'bg-white/10'
+            }`}>
+              <svg className="h-6 w-6 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <span className="text-xs text-gray-200">Profile</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSection('friends')}
+            className={`flex flex-col items-center space-y-1 focus:outline-none ${
+              activeSection === 'friends' ? 'opacity-100' : 'opacity-80'
+            }`}
+          >
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg border border-white/20 transition-all ${
+              activeSection === 'friends'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 scale-105'
+                : 'bg-white/10'
+            }`}>
+              <svg className="h-6 w-6 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              </svg>
+            </div>
+            <span className="text-xs text-gray-200">Friends</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSection('add-friends')}
+            className={`flex flex-col items-center space-y-1 focus:outline-none ${
+              activeSection === 'add-friends' ? 'opacity-100' : 'opacity-80'
+            }`}
+          >
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg border border-white/20 transition-all ${
+              activeSection === 'add-friends'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 scale-105'
+                : 'bg-white/10'
+            }`}>
+              <svg className="h-6 w-6 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+            </div>
+            <span className="text-xs text-gray-200">Add</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSection('chat')}
+            className={`flex flex-col items-center space-y-1 focus:outline-none ${
+              activeSection === 'chat' ? 'opacity-100' : 'opacity-80'
+            }`}
+          >
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg border border-white/20 transition-all ${
+              activeSection === 'chat'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 scale-105'
+                : 'bg-white/10'
+            }`}>
+              <svg className="h-6 w-6 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-2.58-.37l-3.42 1.42c-.362.15-.766-.04-.766-.44v-2.77A8.001 8.001 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+              </svg>
+            </div>
+            <span className="text-xs text-gray-200">Chat</span>
+          </button>
+        </div>
+      </div>
+
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="transition-all duration-300">
@@ -171,14 +248,8 @@ export function Dashboard() {
         </div>
       </main>
 
-      {/* Floating Action Button for Mobile */}
-      <div className="fixed bottom-6 right-6 md:hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-full p-3 shadow-lg">
-          <svg className="h-6 w-6 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-        </div>
-      </div>
+      {/* Floating Action Button for Mobile (removed in favor of bottom icons) */}
+      {/* Intentionally removed to avoid overlap with the new mobile logo menu */}
     </div>
   )
 }

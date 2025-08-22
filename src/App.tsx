@@ -39,8 +39,9 @@ function AppContent() {
       <div className="relative">
         <Dashboard />
         
-        {/* Modern Back Button - Moved to Bottom */}
-        <div className="fixed bottom-6 left-6 z-50 animate-slide-left">
+        {/* Back Button */}
+        {/* Desktop/Tablet: keep card-style at bottom-left */}
+        <div className="fixed bottom-6 left-6 z-50 animate-slide-left hidden md:block">
           <button
             onClick={() => setShowDashboard(false)}
             className="glass-card glass-hover px-6 py-4 rounded-2xl shadow-xl transition-all duration-300 hover:scale-105 font-medium group"
@@ -56,6 +57,18 @@ function AppContent() {
                 <div className="text-gray-400 text-sm">ke Game Center</div>
               </div>
             </div>
+          </button>
+        </div>
+        {/* Mobile: compact circular button at bottom-left to avoid covering content */}
+        <div className="fixed bottom-6 left-6 z-50 md:hidden">
+          <button
+            onClick={() => setShowDashboard(false)}
+            aria-label="Kembali ke Game Center"
+            className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 shadow-lg flex items-center justify-center active:scale-95 transition-transform focus:outline-none focus:ring-4 focus:ring-blue-500/40"
+          >
+            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
           </button>
         </div>
       </div>
@@ -81,7 +94,7 @@ function AppContent() {
       <Home onGameSelect={setSelectedGame} />
       
       {/* Modern Floating Navigation */}
-      <div className="fixed top-6 right-6 z-50 animate-slide-right">
+      <div className="fixed top-6 right-6 z-50 animate-slide-right hidden md:block">
         <div className="flex flex-col space-y-4">
           {/* User Profile Card */}
           <div className="glass-card glass-hover rounded-3xl p-6 max-w-xs animate-float">
@@ -129,6 +142,27 @@ function AppContent() {
             </button>
           </div>
         </div>
+      </div>
+      {/* Mobile-only floating avatar button (bottom-right) */}
+      <div className="fixed bottom-6 right-6 z-50 md:hidden">
+        <button
+          onClick={() => setShowDashboard(true)}
+          aria-label="Open Profile & Friends"
+          className="relative w-14 h-14 rounded-full shadow-lg bg-gradient-to-br from-purple-600 to-blue-600 p-0 overflow-hidden focus:outline-none focus:ring-4 focus:ring-blue-500/40"
+        >
+          {userProfile?.avatar_url ? (
+            <img
+              src={userProfile.avatar_url}
+              alt={userProfile?.username || 'User avatar'}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-white text-xl font-bold">
+              {userProfile?.username?.charAt(0).toUpperCase() || 'U'}
+            </div>
+          )}
+          <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-800"></span>
+        </button>
       </div>
     </div>
   );
