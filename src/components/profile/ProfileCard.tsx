@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { FriendService } from '../../services/friendService'
+import type { FriendWithUser } from '../../lib/supabase'
 
 export function ProfileCard() {
   const { userProfile, updateProfile, signOut } = useAuth()
@@ -12,6 +14,9 @@ export function ProfileCard() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [friends, setFriends] = useState<FriendWithUser[]>([])
+  const [friendsLoading, setFriendsLoading] = useState(false)
+  const [friendsError, setFriendsError] = useState('')
 
   const handleSave = async () => {
     if (loading) return // Prevent multiple simultaneous saves
@@ -54,6 +59,22 @@ export function ProfileCard() {
     }))
   }
 
+  useEffect(() => {
+    const loadFriends = async () => {
+      if (!userProfile) return
+      setFriendsLoading(true)
+      setFriendsError('')
+      const { friends, error } = await FriendService.getFriends('accepted')
+      if (error) {
+        setFriendsError(error)
+      } else {
+        setFriends(friends)
+      }
+      setFriendsLoading(false)
+    }
+    loadFriends()
+  }, [userProfile?.id])
+
   if (!userProfile) return null
 
   return (
@@ -65,6 +86,7 @@ export function ProfileCard() {
               <img
                 src={userProfile.avatar_url}
                 alt={userProfile.username}
+                loading="lazy"
                 className="w-24 h-24 rounded-full object-cover"
               />
             ) : (
@@ -145,7 +167,7 @@ export function ProfileCard() {
           <div className="text-sm text-gray-400">Games Played</div>
         </div>
         <div className="bg-white/10 rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-green-400">0</div>
+          <div className="text-2xl font-bold text-green-400">{friends.length}</div>
           <div className="text-sm text-gray-400">Friends</div>
         </div>
       </div>
@@ -162,6 +184,46 @@ export function ProfileCard() {
             <span className="font-medium text-gray-300">{new Date(userProfile.updated_at).toLocaleDateString()}</span>
           </div>
         </div>
+      </div>
+
+      {/* Friends Preview */}
+      <div className="bg-white/10 rounded-lg p-4 mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-gray-200">Friends ({friends.length})</h3>
+          {friendsLoading && <span className="text-xs text-gray-400">Loading...</span>}
+        </div>
+        {friendsError && (
+          <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-3 py-2 rounded mb-3 text-sm">
+            {friendsError}
+          </div>
+        )}
+        {friends.length === 0 && !friendsLoading ? (
+          <p className="text-sm text-gray-400">You have no friends yet. Add some in the Friends tab.</p>
+        ) : (
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+            {friends.slice(0, 8).map((f) => (
+              <div key={f.id} className="flex flex-col items-center">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  {f.friend.avatar_url ? (
+                    <img
+                      src={f.friend.avatar_url}
+                      alt={f.friend.username}
+                      loading="lazy"
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white font-bold">
+                      {f.friend.username.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <span className="mt-1 text-xs text-gray-300 truncate max-w-[5rem]">
+                  {f.friend.full_name || f.friend.username}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex space-x-3">

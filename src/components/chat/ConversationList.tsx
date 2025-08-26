@@ -101,12 +101,13 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
           >
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                   {conversation.other_user.avatar_url ? (
                     <img
                       src={conversation.other_user.avatar_url}
                       alt={conversation.other_user.username}
-                      className="w-12 h-12 rounded-full object-cover"
+                      loading="lazy"
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover"
                     />
                   ) : (
                     <span className="text-white font-medium text-lg">
@@ -115,7 +116,7 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
                   )}
                 </div>
                 {/* Online status indicator - you can implement this later */}
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800"></div>
+                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 md:w-3 md:h-3 bg-green-500 rounded-full border-2 border-gray-800"></div>
               </div>
               
               <div className="flex-1 min-w-0">

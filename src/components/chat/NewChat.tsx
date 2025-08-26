@@ -97,12 +97,13 @@ export function NewChat({ onChatCreated, onClose }: NewChatProps) {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                       {friend.friend.avatar_url ? (
                         <img
                           src={friend.friend.avatar_url}
                           alt={friend.friend.username}
-                          className="w-10 h-10 rounded-full object-cover"
+                          loading="lazy"
+                          className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover"
                         />
                       ) : (
                         <span className="text-white font-medium">

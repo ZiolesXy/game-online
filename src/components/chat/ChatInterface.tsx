@@ -5,9 +5,10 @@ import type { ConversationWithUser, MessageWithSender, Message } from '../../lib
 
 interface ChatInterfaceProps {
   conversation: ConversationWithUser
+  onBack?: () => void
 }
 
-export function ChatInterface({ conversation }: ChatInterfaceProps) {
+export function ChatInterface({ conversation, onBack }: ChatInterfaceProps) {
   const { userProfile } = useAuth()
   const [messages, setMessages] = useState<MessageWithSender[]>([])
   const [newMessage, setNewMessage] = useState('')
@@ -127,14 +128,27 @@ export function ChatInterface({ conversation }: ChatInterfaceProps) {
   return (
     <div className="h-full flex flex-col">
       {/* Chat Header */}
-      <div className="p-4 border-b border-white/10 bg-white/5">
+      <div className="p-3 md:p-4 border-b border-white/10 bg-white/5 sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-white/10">
         <div className="flex items-center space-x-3">
+          {/* Mobile back button */}
+          {onBack && (
+            <button
+              className="md:hidden mr-1 p-2 rounded-full hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onClick={onBack}
+              aria-label="Back to conversations"
+            >
+              <svg className="w-5 h-5 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
           <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
             {conversation.other_user.avatar_url ? (
               <img
                 src={conversation.other_user.avatar_url}
                 alt={conversation.other_user.username}
-                className="w-10 h-10 rounded-full object-cover"
+                loading="lazy"
+                className="w-10 h-10 md:w-10 md:h-10 rounded-full object-cover"
               />
             ) : (
               <span className="text-white font-medium">
@@ -143,7 +157,7 @@ export function ChatInterface({ conversation }: ChatInterfaceProps) {
             )}
           </div>
           <div>
-            <h3 className="font-medium text-gray-100">
+            <h3 className="font-medium text-gray-100 md:text-xl">
               {conversation.other_user.full_name || conversation.other_user.username}
             </h3>
             <p className="text-sm text-gray-400">@{conversation.other_user.username}</p>
@@ -152,7 +166,7 @@ export function ChatInterface({ conversation }: ChatInterfaceProps) {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4">
         {error && (
           <div className="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded mb-4">
             {error}
@@ -181,7 +195,7 @@ export function ChatInterface({ conversation }: ChatInterfaceProps) {
                 )}
                 
                 <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-xs lg:max-w-md ${isOwnMessage ? 'order-2' : 'order-1'}`}>
+                  <div className={`max-w-sm md:max-w-lg xl:max-w-2xl ${isOwnMessage ? 'order-2' : 'order-1'}`}>
                     <div
                       className={`px-4 py-2 rounded-2xl ${
                         isOwnMessage
@@ -189,7 +203,7 @@ export function ChatInterface({ conversation }: ChatInterfaceProps) {
                           : 'bg-white/10 text-gray-100'
                       }`}
                     >
-                      <p className="text-sm">{message.content}</p>
+                      <p className="text-sm md:text-base">{message.content}</p>
                     </div>
                     <div className={`mt-1 ${isOwnMessage ? 'text-right' : 'text-left'}`}>
                       <span className="text-xs text-gray-500">
@@ -206,7 +220,7 @@ export function ChatInterface({ conversation }: ChatInterfaceProps) {
       </div>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-white/10">
+      <div className="p-2 md:p-4 border-t border-white/10 sticky bottom-0 z-10 bg-gradient-to-t from-gray-900/90 to-transparent" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.5rem)' }}>
         <form onSubmit={handleSendMessage} className="flex space-x-2">
           <input
             type="text"

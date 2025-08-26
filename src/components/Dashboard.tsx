@@ -16,42 +16,43 @@ export function Dashboard() {
   return (
     <div className="min-h-screen">
       {/* Modern Header */}
-      <header className="glass-card sticky top-0 z-50 border-b border-white/10">
+      <header className="glass-card sticky top-0 z-40 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-6 animate-slide-left">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-5 motion-safe:animate-slide-left">
               <div className="relative">
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-3 rounded-2xl animate-glow">
-                  <svg className="h-10 w-10 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-gradient-to-r from-purple-600 to-blue-600/90 p-2.5 rounded-xl motion-safe:animate-glow shadow-md">
+                  <svg className="h-8 w-8 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                   </svg>
                 </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full animate-pulse"></div>
+                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full motion-safe:animate-pulse"></div>
               </div>
               <div>
-                <h1 className="text-3xl font-black">
+                <h1 className="text-2xl font-black">
                   Fun Zone
                 </h1>
-                <p className="text-lg text-gray-400 font-medium">Gaming Social Platform</p>
+                <p className="text-base text-gray-400 font-medium">Gaming Social Platform</p>
               </div>
               {userProfile && (
-                <div className="hidden md:flex items-center space-x-3 ml-8 pl-8 border-l border-gray-200">
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <div className="hidden md:flex items-center space-x-3 ml-6 pl-6 border-l border-gray-200/60">
+                  <div className="w-9 h-9 bg-gradient-to-r from-blue-500 to-purple-600/90 rounded-full flex items-center justify-center shadow-md">
                     {userProfile.avatar_url ? (
                       <img
                         src={userProfile.avatar_url}
                         alt={userProfile.username}
-                        className="w-10 h-10 rounded-full object-cover"
+                        loading="lazy"
+                        className="w-9 h-9 rounded-full object-cover"
                       />
                     ) : (
-                      <span className="text-gray-100 text-sm font-bold">
+                      <span className="text-gray-100 text-xs font-bold">
                         {userProfile.username.charAt(0).toUpperCase()}
                       </span>
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-white">Welcome back!</p>
-                    <p className="text-sm text-gray-100">{userProfile.username}</p>
+                    <p className="font-medium text-white text-sm">Welcome back!</p>
+                    <p className="text-xs text-gray-100">{userProfile.username}</p>
                   </div>
                 </div>
               )}
@@ -60,7 +61,7 @@ export function Dashboard() {
             <nav className="flex items-center space-x-4">
               <button
                 onClick={handleSignOut}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-white/50 transition-all duration-200 hover:scale-105"
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-white/40 transition-all duration-200 hover:scale-105"
               >
                 <div className="flex items-center space-x-2">
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,15 +76,15 @@ export function Dashboard() {
       </header>
 
       {/* Navigation - Desktop Tabs */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
         <div className="hidden md:flex justify-center">
-          <div className="flex bg-white/70 backdrop-blur-sm rounded-2xl p-1 shadow-lg border border-white/30">
+          <div className="flex bg-white/60 backdrop-blur-sm rounded-xl p-1 shadow-md border border-white/30">
             <button
               onClick={() => setActiveSection('profile')}
-              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                 activeSection === 'profile'
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-gray-100 shadow-lg transform scale-[1.02]'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-gray-100 shadow-md transform scale-[1.01]'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/40'
               }`}
             >
               <div className="flex items-center space-x-2">
@@ -95,10 +96,10 @@ export function Dashboard() {
             </button>
             <button
               onClick={() => setActiveSection('friends')}
-              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                 activeSection === 'friends'
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-gray-100 shadow-lg transform scale-[1.02]'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-gray-100 shadow-md transform scale-[1.01]'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/40'
               }`}
             >
               <div className="flex items-center space-x-2">
@@ -110,10 +111,10 @@ export function Dashboard() {
             </button>
             <button
               onClick={() => setActiveSection('add-friends')}
-              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                 activeSection === 'add-friends'
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-gray-100 shadow-lg transform scale-[1.02]'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-gray-100 shadow-md transform scale-[1.01]'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/40'
               }`}
             >
               <div className="flex items-center space-x-2">
@@ -125,10 +126,10 @@ export function Dashboard() {
             </button>
             <button
               onClick={() => setActiveSection('chat')}
-              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                 activeSection === 'chat'
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-gray-100 shadow-lg transform scale-[1.02]'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/50'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-gray-100 shadow-md transform scale-[1.01]'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/40'
               }`}
             >
               <div className="flex items-center space-x-2">
@@ -143,7 +144,7 @@ export function Dashboard() {
       </div>
 
       {/* Navigation - Mobile Icon Logo Menu */}
-      <div className="md:hidden px-4 pt-4">
+      <div className="md:hidden px-4 pt-3">
         <div className="grid grid-cols-4 gap-3">
           <button
             onClick={() => setActiveSection('profile')}
@@ -151,9 +152,9 @@ export function Dashboard() {
               activeSection === 'profile' ? 'opacity-100' : 'opacity-80'
             }`}
           >
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg border border-white/20 transition-all ${
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md border border-white/20 transition-all ${
               activeSection === 'profile'
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 scale-105'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600/90 scale-105'
                 : 'bg-white/10'
             }`}>
               <svg className="h-6 w-6 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,9 +170,9 @@ export function Dashboard() {
               activeSection === 'friends' ? 'opacity-100' : 'opacity-80'
             }`}
           >
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg border border-white/20 transition-all ${
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md border border-white/20 transition-all ${
               activeSection === 'friends'
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 scale-105'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600/90 scale-105'
                 : 'bg-white/10'
             }`}>
               <svg className="h-6 w-6 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,9 +188,9 @@ export function Dashboard() {
               activeSection === 'add-friends' ? 'opacity-100' : 'opacity-80'
             }`}
           >
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg border border-white/20 transition-all ${
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md border border-white/20 transition-all ${
               activeSection === 'add-friends'
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 scale-105'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600/90 scale-105'
                 : 'bg-white/10'
             }`}>
               <svg className="h-6 w-6 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,9 +206,9 @@ export function Dashboard() {
               activeSection === 'chat' ? 'opacity-100' : 'opacity-80'
             }`}
           >
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg border border-white/20 transition-all ${
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md border border-white/20 transition-all ${
               activeSection === 'chat'
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 scale-105'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600/90 scale-105'
                 : 'bg-white/10'
             }`}>
               <svg className="h-6 w-6 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,7 +221,7 @@ export function Dashboard() {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="transition-all duration-300">
           {activeSection === 'profile' && (
             <div className="max-w-2xl mx-auto">
@@ -241,7 +242,7 @@ export function Dashboard() {
           )}
           
           {activeSection === 'chat' && (
-            <div className="h-screen">
+            <div className="min-h-[60vh] md:min-h-[70vh]">
               <ChatPage />
             </div>
           )}
