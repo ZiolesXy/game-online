@@ -16,6 +16,7 @@ export interface User {
   username: string
   full_name?: string
   avatar_url?: string
+  role: 'user' | 'admin'
   created_at: string
   updated_at: string
 }
@@ -60,4 +61,23 @@ export interface ConversationWithUser extends Conversation {
 
 export interface MessageWithSender extends Message {
   sender: User
+}
+
+export interface GameRequest {
+  id: string
+  user_id: string
+  title: string
+  description?: string
+  category: 'Strategi' | 'Aksi' | 'Horor' | 'Arcade' | 'Puzzle'
+  file_path: string
+  status: 'waiting' | 'accepted' | 'declined'
+  admin_notes?: string
+  reviewed_by?: string
+  reviewed_at?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface GameRequestWithUser extends GameRequest {
+  user: User
 }

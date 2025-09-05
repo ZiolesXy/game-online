@@ -1,13 +1,30 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { ProfileCard } from './profile/ProfileCard'
 import { FriendsList } from './friends/FriendsList'
 import { AddFriend } from './friends/AddFriend'
 import { ChatPage } from '../pages/ChatPage'
+import { GameRequestManager } from './requests/GameRequestManager'
+import { AdminRequestDashboard } from './admin/AdminRequestDashboard'
+import { gameRequestService } from '../services/gameRequestService'
 
 export function Dashboard() {
   const { userProfile, signOut } = useAuth()
-  const [activeSection, setActiveSection] = useState<'profile' | 'friends' | 'add-friends' | 'chat'>('profile')
+  const [activeSection, setActiveSection] = useState<'profile' | 'friends' | 'add-friends' | 'chat' | 'game-requests' | 'admin'>('profile')
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const adminStatus = await gameRequestService.isUserAdmin()
+        setIsAdmin(adminStatus)
+      } catch (error) {
+        console.error('Error checking admin status:', error)
+      }
+    }
+    
+    checkAdminStatus()
+  }, [])
 
   const handleSignOut = async () => {
     await signOut()
@@ -139,13 +156,45 @@ export function Dashboard() {
                 <span>Chat</span>
               </div>
             </button>
+            <button
+              onClick={() => setActiveSection('game-requests')}
+              className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
+                activeSection === 'game-requests'
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-gray-100 shadow-md transform scale-[1.01]'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-white/40'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <span>Game Requests</span>
+              </div>
+            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setActiveSection('admin')}
+                className={`px-5 py-2.5 rounded-lg font-medium transition-all duration-200 ${
+                  activeSection === 'admin'
+                    ? 'bg-gradient-to-r from-red-600 to-orange-600 text-gray-100 shadow-md transform scale-[1.01]'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-white/40'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <span>Admin</span>
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Navigation - Mobile Icon Logo Menu */}
       <div className="md:hidden px-4 pt-3">
-        <div className="grid grid-cols-4 gap-3">
+        <div className={`grid gap-3 ${isAdmin ? 'grid-cols-6' : 'grid-cols-5'}`}>
           <button
             onClick={() => setActiveSection('profile')}
             className={`flex flex-col items-center space-y-1 focus:outline-none ${
@@ -217,6 +266,44 @@ export function Dashboard() {
             </div>
             <span className="text-xs text-gray-200">Chat</span>
           </button>
+
+          <button
+            onClick={() => setActiveSection('game-requests')}
+            className={`flex flex-col items-center space-y-1 focus:outline-none ${
+              activeSection === 'game-requests' ? 'opacity-100' : 'opacity-80'
+            }`}
+          >
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md border border-white/20 transition-all ${
+              activeSection === 'game-requests'
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600/90 scale-105'
+                : 'bg-white/10'
+            }`}>
+              <svg className="h-6 w-6 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <span className="text-xs text-gray-200">Requests</span>
+          </button>
+
+          {isAdmin && (
+            <button
+              onClick={() => setActiveSection('admin')}
+              className={`flex flex-col items-center space-y-1 focus:outline-none ${
+                activeSection === 'admin' ? 'opacity-100' : 'opacity-80'
+              }`}
+            >
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md border border-white/20 transition-all ${
+                activeSection === 'admin'
+                  ? 'bg-gradient-to-r from-red-600 to-orange-600/90 scale-105'
+                  : 'bg-white/10'
+              }`}>
+                <svg className="h-6 w-6 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <span className="text-xs text-gray-200">Admin</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -244,6 +331,18 @@ export function Dashboard() {
           {activeSection === 'chat' && (
             <div className="min-h-[60vh] md:min-h-[70vh]">
               <ChatPage />
+            </div>
+          )}
+          
+          {activeSection === 'game-requests' && (
+            <div className="max-w-6xl mx-auto">
+              <GameRequestManager />
+            </div>
+          )}
+          
+          {activeSection === 'admin' && isAdmin && (
+            <div className="max-w-7xl mx-auto">
+              <AdminRequestDashboard />
             </div>
           )}
         </div>

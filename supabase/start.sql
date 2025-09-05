@@ -18,6 +18,7 @@ create table if not exists public.users (
   username text unique not null,
   full_name text,
   avatar_url text,
+  role text check (role in ('user','admin')) default 'user',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -287,10 +288,77 @@ create policy "Only authenticated can delete games" on public.games
   for delete using (auth.uid() is not null);
 
 -- ===============
--- Storage bucket: games
+-- Game Requests table
+-- ===============
+create table if not exists public.game_requests (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.users(id) on delete cascade not null,
+  title text not null,
+  description text,
+  category text check (category in ('Strategi','Aksi','Horor','Arcade','Puzzle')) default 'Arcade',
+  file_path text not null, -- path to uploaded zip file in requests bucket
+  status text check (status in ('waiting','accepted','declined')) default 'waiting',
+  admin_notes text,
+  reviewed_by uuid references public.users(id) on delete set null,
+  reviewed_at timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create index if not exists idx_game_requests_user_id on public.game_requests(user_id);
+create index if not exists idx_game_requests_status on public.game_requests(status);
+create index if not exists idx_game_requests_created_at on public.game_requests(created_at);
+
+alter table public.game_requests enable row level security;
+
+-- updated_at trigger for game_requests
+drop trigger if exists handle_game_requests_updated_at on public.game_requests;
+create trigger handle_game_requests_updated_at
+  before update on public.game_requests
+  for each row execute function public.handle_updated_at();
+
+-- RLS policies for game_requests
+drop policy if exists "Users can view their own requests" on public.game_requests;
+drop policy if exists "Users can create requests" on public.game_requests;
+drop policy if exists "Users can update their own requests" on public.game_requests;
+drop policy if exists "Admins can view all requests" on public.game_requests;
+drop policy if exists "Admins can update all requests" on public.game_requests;
+
+create policy "Users can view their own requests" on public.game_requests
+  for select using (auth.uid() = user_id);
+
+create policy "Users can create requests" on public.game_requests
+  for insert with check (auth.uid() = user_id);
+
+create policy "Users can update their own requests" on public.game_requests
+  for update using (auth.uid() = user_id and status = 'waiting');
+
+create policy "Admins can view all requests" on public.game_requests
+  for select using (
+    auth.uid() = user_id or
+    exists (
+      select 1 from public.users u 
+      where u.id = auth.uid() and u.role = 'admin'
+    )
+  );
+
+create policy "Admins can update all requests" on public.game_requests
+  for update using (
+    exists (
+      select 1 from public.users u 
+      where u.id = auth.uid() and u.role = 'admin'
+    )
+  );
+
+-- ===============
+-- Storage buckets: games and requests
 -- ===============
 insert into storage.buckets (id, name, public)
 values ('games','games', true)
+on conflict (id) do nothing;
+
+insert into storage.buckets (id, name, public)
+values ('requests','requests', false)
 on conflict (id) do nothing;
 
 -- Storage policies for bucket 'games'
@@ -309,3 +377,36 @@ create policy "Authenticated update games bucket" on storage.objects
 drop policy if exists "Authenticated delete games bucket" on storage.objects;
 create policy "Authenticated delete games bucket" on storage.objects
   for delete using (bucket_id = 'games' and auth.uid() is not null);
+
+-- Storage policies for bucket 'requests'
+drop policy if exists "Users can upload to requests bucket" on storage.objects;
+create policy "Users can upload to requests bucket" on storage.objects
+  for insert with check (bucket_id = 'requests' and auth.uid() is not null);
+
+drop policy if exists "Users can read their own requests" on storage.objects;
+create policy "Users can read their own requests" on storage.objects
+  for select using (
+    bucket_id = 'requests' and 
+    auth.uid() is not null and
+    (auth.uid()::text = (storage.foldername(name))[1])
+  );
+
+drop policy if exists "Admins can read all requests" on storage.objects;
+create policy "Admins can read all requests" on storage.objects
+  for select using (
+    bucket_id = 'requests' and
+    exists (
+      select 1 from public.users u 
+      where u.id = auth.uid() and u.role = 'admin'
+    )
+  );
+
+drop policy if exists "Admins can delete requests" on storage.objects;
+create policy "Admins can delete requests" on storage.objects
+  for delete using (
+    bucket_id = 'requests' and
+    exists (
+      select 1 from public.users u 
+      where u.id = auth.uid() and u.role = 'admin'
+    )
+  );
