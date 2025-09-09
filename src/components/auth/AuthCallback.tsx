@@ -37,15 +37,6 @@ export function AuthCallback() {
             return
           }
 
-          // Check if profile completion is needed
-          const { needsCompletion } = await AuthService.checkProfileCompletion(authUser.id)
-          console.log('AuthCallback: Profile completion needed:', needsCompletion)
-          
-          if (needsCompletion) {
-            navigate('/complete-profile')
-            return
-          }
-
           // Successfully authenticated, redirect to home
           console.log('AuthCallback: Redirecting to home')
           navigate('/')
