@@ -15,6 +15,21 @@ const GameList: React.FC<Props> = ({ games, onSelect }) => (
         onClick={() => onSelect(game)}
       >
         <h3 className="text-lg font-semibold">{game.title}</h3>
+        <p className="text-xs text-gray-500 mt-1">
+          by {game.authorUrl ? (
+            <a
+              href={game.authorUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {game.author}
+            </a>
+          ) : (
+            game.author
+          )}
+        </p>
         <p className="text-sm text-gray-600 mt-1">{game.description}</p>
       </div>
     ))}

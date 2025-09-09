@@ -101,7 +101,21 @@ const PlayGame: React.FC<{ game: Game; onBack: () => void; onOpenDashboard?: () 
               </div>
               <div>
                 <h1 className="text-4xl font-black text-gray-100">{game.title}</h1>
-                <p className="text-gray-400 text-sm">by {game.author}</p>
+                <p className="text-gray-400 text-sm">
+                  by {game.authorUrl ? (
+                    <a
+                      href={game.authorUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {game.author}
+                    </a>
+                  ) : (
+                    game.author
+                  )}
+                </p>
               </div>
             </div>
             <p className="text-gray-300 text-lg leading-relaxed max-w-2xl">{game.description}</p>
