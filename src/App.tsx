@@ -115,7 +115,7 @@ function GameRoutes({
               </div>
               <div className="text-left">
                 <div className="text-gray-100 font-semibold">Kembali</div>
-                <div className="text-gray-400 text-sm">ke Game Center</div>
+                <div className="text-gray-400 text-sm">ke Home</div>
               </div>
             </div>
           </button>

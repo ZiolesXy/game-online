@@ -78,6 +78,6 @@ export const games: Game[] = [
     thumbnail: "/PiegonAscent/index.icon.png",
     author: "escada-games",
     authorUrl: "https://escada-games.itch.io/",
-    category: "Strategi",
+    category: "Aksi",
   },
 ];

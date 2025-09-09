@@ -126,7 +126,7 @@ export const AdminRequestDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="bg-gray-900/90 backdrop-blur-sm rounded-lg shadow-xl p-6 border border-gray-700">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <h1 className="text-3xl font-bold text-white">Admin Dashboard - Game Requests</h1>
           <button
             onClick={loadRequests}
@@ -201,16 +201,18 @@ export const AdminRequestDashboard: React.FC = () => {
           <div className="space-y-4">
             {filteredRequests.map((request) => (
               <div key={request.id} className="border border-gray-600 rounded-lg p-6 bg-gray-800/30">
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-white">{request.title}</h3>
-                    <p className="text-gray-300">
+                    <h3 className="text-xl font-semibold text-white break-words">{request.title}</h3>
+                    <p className="text-gray-300 break-words">
                       Oleh: {request.user?.username} ({request.user?.email})
                     </p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(request.status)}`}>
-                    {getStatusText(request.status)}
-                  </span>
+                  <div className="sm:text-right">
+                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(request.status)}`}>
+                      {getStatusText(request.status)}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-gray-300">

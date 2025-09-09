@@ -35,19 +35,18 @@ export function Dashboard() {
       {/* Modern Header */}
       <header className="glass-card sticky top-0 z-40 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-5 motion-safe:animate-slide-left">
-              <div className="relative">
-                <div className="bg-gradient-to-r from-purple-600 to-blue-600/90 p-2.5 rounded-xl motion-safe:animate-glow shadow-md">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 py-4">
+            <div className="flex items-center space-x-4 md:space-x-5 motion-safe:animate-slide-left">
+              <div>
+                <div className="bg-gradient-to-r from-purple-600 to-blue-600/90 p-2.5 rounded-xl motion-safe:animate-glow shadow-md inline-flex">
                   <svg className="h-8 w-8 text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                   </svg>
                 </div>
-                <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full motion-safe:animate-pulse"></div>
               </div>
               <div>
                 <h1 className="text-2xl font-black">
-                  Fun Zone
+                  FunZone
                 </h1>
                 <p className="text-base text-gray-400 font-medium">Gaming Social Platform</p>
               </div>
@@ -78,7 +77,7 @@ export function Dashboard() {
             <nav className="flex items-center space-x-4">
               <button
                 onClick={handleSignOut}
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-white/40 transition-all duration-200 hover:scale-105"
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg:white/40 hover:bg-white/40 transition-all duration-200 hover:scale-105"
               >
                 <div className="flex items-center space-x-2">
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
