@@ -140,51 +140,7 @@ export class AuthService {
     }
   }
 
-  // Check if profile completion is needed for Google OAuth users
-  static async checkProfileCompletion(userId: string): Promise<{ needsCompletion: boolean; error: string | null }> {
-    try {
-      const { user, error } = await this.getUserProfile(userId)
-      
-      if (error) {
-        return { needsCompletion: false, error }
-      }
-      
-      if (!user) {
-        return { needsCompletion: true, error: null }
-      }
-      
-      // For now, assume profile is complete if user exists with username
-      // We can make this more strict later when we add the profile_completed column
-      const needsCompletion = !user.username
-      
-      return { needsCompletion, error: null }
-    } catch (error: any) {
-      return { needsCompletion: false, error: error.message }
-    }
-  }
-
-  // Complete Google OAuth profile
-  static async completeGoogleProfile(userId: string, profileData: { username: string, fullName?: string }) {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .update({
-          username: profileData.username,
-          full_name: profileData.fullName || null,
-          profile_completed: true,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', userId)
-        .select()
-        .single()
-
-      if (error) throw error
-
-      return { user: data, error: null }
-    } catch (error: any) {
-      return { user: null, error: error.message }
-    }
-  }
+  // Removed complete-profile helpers (checkProfileCompletion, completeGoogleProfile)
 
   // Check if email already exists in users table
   static async emailExists(email: string): Promise<boolean> {
@@ -316,11 +272,79 @@ export class AuthService {
     }
   }
 
+  // Reset password - send reset email
+  static async resetPassword(email: string) {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/#/auth/reset-password`
+      })
+
+      if (error) throw error
+
+      return { error: null }
+    } catch (error: any) {
+      return { error: mapAuthErrorMessage(error.message) }
+    }
+  }
+
+  // Update password with reset token
+  static async updatePassword(newPassword: string) {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      })
+
+      if (error) throw error
+
+      return { error: null }
+    } catch (error: any) {
+      return { error: mapAuthErrorMessage(error.message) }
+    }
+  }
+
   // Listen to auth state changes
   static onAuthStateChange(callback: (user: any) => void) {
     return supabase.auth.onAuthStateChange((_event, session) => {
       callback(session?.user || null)
     })
+  }
+
+  // Apply recovery session from URL when using HashRouter
+  // Example URL: https://app/#/auth/reset-password#access_token=...&refresh_token=...&type=recovery
+  static async applyRecoverySessionFromUrl(): Promise<{ applied: boolean; error: string | null }> {
+    try {
+      if (typeof window === 'undefined') return { applied: false, error: null }
+
+      const fullHash = window.location.hash || ''
+      // Find the last '#'
+      const lastIdx = fullHash.lastIndexOf('#')
+      if (lastIdx <= 0) return { applied: false, error: null }
+
+      const paramsStr = fullHash.slice(lastIdx + 1)
+      const params = new URLSearchParams(paramsStr)
+      const type = params.get('type')
+      const access_token = params.get('access_token')
+      const refresh_token = params.get('refresh_token')
+
+      if (type !== 'recovery' || !access_token || !refresh_token) {
+        return { applied: false, error: null }
+      }
+
+      const { error } = await supabase.auth.setSession({ access_token, refresh_token })
+      if (error) {
+        return { applied: false, error: error.message }
+      }
+
+      // Clean up sensitive tokens from URL (preserve the route hash)
+      try {
+        const base = fullHash.substring(0, lastIdx) // keep '#/auth/reset-password'
+        window.location.replace(window.location.pathname + window.location.search + base)
+      } catch {}
+
+      return { applied: true, error: null }
+    } catch (e: any) {
+      return { applied: false, error: e?.message || 'Failed to apply recovery session' }
+    }
   }
 }
 

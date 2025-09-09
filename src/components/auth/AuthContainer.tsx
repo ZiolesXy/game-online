@@ -1,19 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { AuthService } from '../../services/authService'
 import { AuthMethodSelector } from './AuthMethodSelector'
 import { GoogleRegistrationGuide } from './GoogleRegistrationGuide'
 import { LoginForm } from './LoginForm'
 import { RegisterForm } from './RegisterForm'
-import { ProfileCompletion } from './ProfileCompletion'
+import { UpdatePasswordForm } from './UpdatePasswordForm'
 
-type AuthMode = 'selector' | 'email-auth' | 'google-registration'
+type AuthMode = 'selector' | 'email-auth' | 'google-registration' | 'reset-password' | 'update-password'
 type EmailAuthMode = 'login' | 'register'
 
 export function AuthContainer() {
-  const { user, needsProfileCompletion } = useAuth()
+  const { user } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
+  const isPasswordRecovery = location.pathname === '/auth/reset-password'
   const [authMode, setAuthMode] = useState<AuthMode>('selector')
   const [emailAuthMode, setEmailAuthMode] = useState<EmailAuthMode>('login')
   const [googleUnregistered, setGoogleUnregistered] = useState(false)
@@ -68,15 +70,47 @@ export function AuthContainer() {
         navigate('/auth', { replace: true })
       }
     }
-  }, [location.search, location.state, navigate])
 
-  // If user is logged in but needs to complete profile
-  if (user && needsProfileCompletion) {
-    return <ProfileCompletion />
+    // Check if we're on the reset password route
+    if (location.pathname === '/auth/reset-password') {
+      setAuthMode('update-password')
+    }
+  }, [location.search, location.state, location.pathname, navigate])
+
+  // Removed legacy reset-password event listener (no longer triggered from LoginForm)
+
+  // Apply recovery session when landing on /auth/reset-password (HashRouter tokens)
+  useEffect(() => {
+    if (!isPasswordRecovery) return
+    let mounted = true
+    AuthService.applyRecoverySessionFromUrl().then((res) => {
+      if (!mounted) return
+      if (res.error) {
+        console.warn('Failed to apply recovery session:', res.error)
+      }
+      // Ensure the update-password form is shown
+      setAuthMode('update-password')
+    })
+    return () => { mounted = false }
+    // safe to run only on path change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPasswordRecovery])
+
+  // PRIORITY: Password recovery flow must render regardless of auth/profile state
+  if (isPasswordRecovery) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
+            <UpdatePasswordForm onSuccess={handlePasswordUpdateSuccess} />
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  // If user is logged in and profile is complete, this component shouldn't render
-  if (user && !needsProfileCompletion) {
+  // If user is logged in, this component shouldn't render
+  if (user) {
     return null
   }
 
@@ -100,6 +134,15 @@ export function AuthContainer() {
   const handleTryGoogleAgain = async () => {
     // This will be handled by the GoogleRegistrationGuide component
     setAuthMode('selector')
+  }
+
+  // Removed legacy back-to-login handler (not used)
+
+  // Use function declaration to ensure availability before usage
+  function handlePasswordUpdateSuccess() {
+    navigate('/auth')
+    setAuthMode('email-auth')
+    setEmailAuthMode('login')
   }
 
   if (authMode === 'selector') {
@@ -133,6 +176,20 @@ export function AuthContainer() {
         onBackToSelector={handleBackToSelector}
         onTryGoogleAgain={handleTryGoogleAgain}
       />
+    )
+  }
+
+  // Removed legacy reset-password mode (handled via dedicated /reset-password page when needed)
+
+  if (authMode === 'update-password') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
+            <UpdatePasswordForm onSuccess={handlePasswordUpdateSuccess} />
+          </div>
+        </div>
+      </div>
     )
   }
 

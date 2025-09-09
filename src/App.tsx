@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { AuthContainer } from "./components/auth/AuthContainer";
 import { AuthCallback } from "./components/auth/AuthCallback";
-import { ProfileCompletion } from "./components/auth/ProfileCompletion";
+import { ResetPasswordPage } from "./components/auth/ResetPasswordPage";
 import { Dashboard } from "./components/Dashboard";
 import Home from "./pages/Home";
 import PlayGame from "./pages/PlayGame";
@@ -11,7 +11,7 @@ import type { Game } from "./data/game";
 
 function AppContent() {
   const location = useLocation();
-  const { user, userProfile, loading, needsProfileCompletion } = useAuth();
+  const { user, userProfile, loading } = useAuth();
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
 
@@ -62,15 +62,13 @@ function AppContent() {
       {/* Auth routes */}
       <Route path="/auth" element={(!user || forceAuth) ? <AuthContainer /> : <Navigate to="/" replace />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route 
-        path="/complete-profile" 
-        element={user && needsProfileCompletion ? <ProfileCompletion /> : <Navigate to="/" replace />} 
-      />
+      <Route path="/auth/reset-password" element={<AuthContainer />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      {/* Removed complete-profile route */}
       
       {/* Protected routes */}
       <Route path="/*" element={
         !user ? <Navigate to="/auth" replace /> :
-        user && needsProfileCompletion ? <Navigate to="/complete-profile" replace /> :
         <GameRoutes 
           selectedGame={selectedGame}
           setSelectedGame={setSelectedGame}

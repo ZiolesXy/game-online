@@ -1,5 +1,6 @@
 -- start.sql — Initialize Supabase database from scratch for Game Online app
 -- Safe to run on a fresh project. Includes auth profiles, friends, chat, games, and storage policies.
+-- Updated with Google OAuth support and safe user creation
 
 -- ===============
 -- Extensions
@@ -15,9 +16,12 @@ alter default privileges revoke execute on functions from public;
 create table if not exists public.users (
   id uuid references auth.users(id) on delete cascade primary key,
   email text unique not null,
-  username text unique not null,
+  username text, -- Allow NULL temporarily for safe OAuth signup
   full_name text,
   avatar_url text,
+  provider text default 'email',
+  provider_id text,
+  profile_completed boolean default true,
   role text check (role in ('user','admin')) default 'user',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
@@ -86,26 +90,57 @@ begin
 end;
 $$ language plpgsql;
 
--- Auto profile creation on new auth user
-create or replace function public.handle_new_user()
-returns trigger as $$
+-- Safe user profile creation function (no automatic triggers)
+create or replace function public.create_user_profile(
+  user_id uuid,
+  user_email text,
+  base_username text default null,
+  user_full_name text default null,
+  user_provider text default 'email',
+  user_provider_id text default null,
+  user_avatar_url text default null
+)
+returns public.users as $$
+declare
+  final_username text;
+  result public.users;
 begin
-  insert into public.users (id, email, username, full_name)
-  values (
-    new.id,
-    new.email,
-    coalesce(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1)),
-    coalesce(new.raw_user_meta_data->>'full_name', '')
+  -- Generate unique username
+  if base_username is null or base_username = '' then
+    base_username := split_part(user_email, '@', 1);
+  end if;
+  
+  final_username := lower(regexp_replace(base_username, '[^a-z0-9_]+', '_', 'g'));
+  
+  -- Try with suffix if needed
+  while exists (select 1 from public.users where username = final_username) loop
+    final_username := base_username || '_' || substr(md5(random()::text), 1, 6);
+  end loop;
+
+  -- Insert user
+  insert into public.users (
+    id, email, username, full_name, provider, provider_id, avatar_url, 
+    profile_completed, created_at, updated_at
+  ) values (
+    user_id, user_email, final_username, user_full_name, user_provider, 
+    user_provider_id, user_avatar_url, false, now(), now()
   )
-  on conflict (id) do nothing;
-  return new;
+  on conflict (id) do update set
+    email = excluded.email,
+    username = excluded.username,
+    full_name = coalesce(excluded.full_name, users.full_name),
+    provider = excluded.provider,
+    provider_id = excluded.provider_id,
+    avatar_url = coalesce(excluded.avatar_url, users.avatar_url),
+    updated_at = now()
+  returning * into result;
+  
+  return result;
 end;
 $$ language plpgsql security definer;
 
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function public.handle_new_user();
+-- Note: No automatic triggers for user creation to avoid OAuth conflicts
+-- App will call create_user_profile() manually via AuthService.ensureUserRecord()
 
 -- updated_at triggers
 

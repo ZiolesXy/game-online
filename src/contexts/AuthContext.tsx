@@ -6,13 +6,13 @@ interface AuthContextType {
   user: any | null
   userProfile: User | null
   loading: boolean
-  needsProfileCompletion: boolean
   signUp: (email: string, password: string, username: string, fullName?: string) => Promise<{ error: string | null }>
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signInWithGoogle: () => Promise<{ error: string | null }>
-  completeGoogleProfile: (profileData: { username: string, fullName?: string }) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
   updateProfile: (updates: Partial<User>) => Promise<{ error: string | null }>
+  resetPassword: (email: string) => Promise<{ error: string | null }>
+  updatePassword: (newPassword: string) => Promise<{ error: string | null }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -29,7 +29,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any | null>(null)
   const [userProfile, setUserProfile] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [needsProfileCompletion, setNeedsProfileCompletion] = useState(false)
   const [profileLoaded, setProfileLoaded] = useState(false)
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false)
 
@@ -62,17 +61,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (mounted) {
             setUserProfile(profile)
             setProfileLoaded(true)
-            
-            // Check if Google OAuth user needs profile completion
-            if (profile) {
-              const { needsCompletion } = await AuthService.checkProfileCompletion(user.id)
-              console.log('Profile completion needed:', needsCompletion)
-              setNeedsProfileCompletion(needsCompletion)
-            } else {
-              // If still no profile, force completion for Google users
-              console.log('No profile found, forcing completion')
-              setNeedsProfileCompletion(true)
-            }
           }
         }
       } catch (error) {
@@ -117,14 +105,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (mounted && !isUpdatingProfile) {
               setUserProfile(profile)
               setProfileLoaded(true)
-              
-              // Check if Google OAuth user needs profile completion
-              if (profile) {
-                const { needsCompletion } = await AuthService.checkProfileCompletion(newUser.id)
-                setNeedsProfileCompletion(needsCompletion)
-              } else {
-                setNeedsProfileCompletion(true)
-              }
             }
           } catch (error) {
             console.warn('Failed to ensure/load user profile:', error)
@@ -164,22 +144,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }
 
-  const completeGoogleProfile = async (profileData: { username: string, fullName?: string }) => {
-    if (!user) return { error: 'No user logged in' }
-    
-    const { user: updatedProfile, error } = await AuthService.completeGoogleProfile(user.id, profileData)
-    
-    if (error) {
-      return { error }
-    }
-    
-    if (updatedProfile) {
-      setUserProfile(updatedProfile)
-      setNeedsProfileCompletion(false)
-    }
-    
-    return { error: null }
-  }
 
   const signOut = async () => {
     setLoading(true)
@@ -231,17 +195,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const resetPassword = async (email: string) => {
+    const { error } = await AuthService.resetPassword(email)
+    return { error }
+  }
+
+  const updatePassword = async (newPassword: string) => {
+    const { error } = await AuthService.updatePassword(newPassword)
+    return { error }
+  }
+
   const value: AuthContextType = {
     user,
     userProfile,
     loading,
-    needsProfileCompletion,
     signUp,
     signIn,
     signInWithGoogle,
-    completeGoogleProfile,
     signOut,
-    updateProfile
+    updateProfile,
+    resetPassword,
+    updatePassword
   }
 
   return (
