@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { AuthMethodSelector } from './AuthMethodSelector'
 import { GoogleRegistrationGuide } from './GoogleRegistrationGuide'
@@ -13,13 +13,33 @@ type EmailAuthMode = 'login' | 'register'
 export function AuthContainer() {
   const { user, needsProfileCompletion } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const [authMode, setAuthMode] = useState<AuthMode>('selector')
   const [emailAuthMode, setEmailAuthMode] = useState<EmailAuthMode>('login')
   const [googleUnregistered, setGoogleUnregistered] = useState(false)
+  const [oauthError, setOauthError] = useState<string | null>(null)
 
   // Detect redirect flag when Google account is not registered in DB
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
+    // With HashRouter, rely on React Router's location.search.
+    // Fallback: if empty, parse query from the hash fragment (e.g., '#/auth?google_unregistered=1').
+    let params = new URLSearchParams(location.search)
+    if (![...params.keys()].length && typeof location.hash === 'string') {
+      const hashStr = (location.hash as unknown as string) || ''
+      const qIndex = hashStr.indexOf('?')
+      if (qIndex >= 0) {
+        params = new URLSearchParams(hashStr.slice(qIndex))
+      }
+    }
+    // Capture generic OAuth error if present
+    const errorCode = params.get('error') || params.get('error_code')
+    const errorDesc = params.get('error_description')
+    if (errorCode) {
+      const nice = errorDesc ? decodeURIComponent(errorDesc) : 'Autentikasi gagal. Coba lagi.'
+      setOauthError(nice.replace(/\+/g, ' '))
+      // Clean error params from URL
+      navigate('/auth', { replace: true })
+    }
     const flag = params.get('google_unregistered')
     const navState = (location as any).state as { googleUnregistered?: boolean } | null
     let shouldShow = flag === '1' || !!navState?.googleUnregistered
@@ -44,12 +64,11 @@ export function AuthContainer() {
       setEmailAuthMode('register')
       // Clean the URL if needed
       if (flag === '1') {
-        params.delete('google_unregistered')
-        const newUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`
-        window.history.replaceState({}, '', newUrl)
+        // In HashRouter, use navigate replace to remove the query param safely
+        navigate('/auth', { replace: true })
       }
     }
-  }, [location.search])
+  }, [location.search, location.state, navigate])
 
   // If user is logged in but needs to complete profile
   if (user && needsProfileCompletion) {
@@ -88,6 +107,11 @@ export function AuthContainer() {
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
         <div className="max-w-md w-full">
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
+            {oauthError && (
+              <div className="mb-4 p-3 rounded-lg bg-red-400/10 border border-red-400/30 text-red-200 text-sm">
+                {oauthError}
+              </div>
+            )}
             {googleUnregistered && (
               <div className="mb-4 p-3 rounded-lg bg-yellow-400/10 border border-yellow-400/30 text-yellow-200 text-sm">
                 Akun Google Anda belum terdaftar. Silakan daftar terlebih dahulu menggunakan email.

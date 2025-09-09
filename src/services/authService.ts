@@ -74,71 +74,47 @@ export class AuthService {
         return existing
       }
 
-      // Derive basic fields from auth user metadata
-      const email: string | null = authUser.email || null
+      // Derive fields from auth user metadata
+      const email: string = authUser.email || ''
       const rawMeta = authUser.user_metadata || {}
-      const username = (rawMeta.username as string) || (email ? (email.split('@')[0]) : null)
-      const full_name = (rawMeta.full_name as string) || (rawMeta.name as string) || null
+      const appMeta = authUser.app_metadata || {}
+      
+      const baseUsername = (rawMeta.username as string) || 
+                          (rawMeta.preferred_username as string) || 
+                          (email ? email.split('@')[0] : null)
+      const fullName = (rawMeta.full_name as string) || 
+                      (rawMeta.name as string) || 
+                      null
+      const provider = appMeta.provider || 'email'
+      const providerId = rawMeta.sub || rawMeta.provider_id || null
+      const avatarUrl = rawMeta.avatar_url || rawMeta.picture || null
 
-      // Generate a safe fallback username if needed
-      let safeUsername = username || (email ? email.split('@')[0] : null) || `user_${String(authUser.id).slice(0, 8)}`
-      // Ensure it's only allowed chars
-      safeUsername = String(safeUsername).toLowerCase().replace(/[^a-z0-9_]/g, '_')
+      console.log('Creating user profile via SQL function:', { 
+        id: authUser.id, email, baseUsername, provider 
+      })
 
-      // Use only basic columns that exist in original schema
-      let lastErr: any = null
-      for (let attempt = 0; attempt < 3; attempt++) {
-        const candidate = attempt === 0 ? safeUsername : `${safeUsername}_${Math.floor(Math.random() * 10000)}`
-        
-        console.log('Attempting to insert user with basic fields:', { id: authUser.id, email, username: candidate, full_name })
-        
-        const { data, error } = await supabase
-          .from('users')
-          .upsert({
-            id: authUser.id,
-            email,
-            username: candidate,
-            full_name
-          }, { onConflict: 'id' })
-          .select()
-          .single()
+      // Use the new SQL function to create user profile safely
+      const { data, error } = await supabase.rpc('create_user_profile', {
+        user_id: authUser.id,
+        user_email: email,
+        base_username: baseUsername,
+        user_full_name: fullName,
+        user_provider: provider,
+        user_provider_id: providerId,
+        user_avatar_url: avatarUrl
+      })
 
-        if (!error) {
-          console.log('Successfully created/updated user:', data)
-          return { user: data as unknown as User, error: null }
-        }
-        
-        console.error('Insert attempt failed:', error)
-        lastErr = error
-        
-        // Continue retrying on unique violations
-        const msg = String(error.message || '').toLowerCase()
-        const code = (error as any).code
-        if (!(msg.includes('unique') || msg.includes('duplicate') || code === '23505')) {
-          break
-        }
+      if (error) {
+        console.error('create_user_profile failed:', error)
+        throw error
       }
 
-      if (lastErr) throw lastErr
+      console.log('Successfully created user profile:', data)
+      return { user: data as User, error: null }
 
-      // Final fallback: read back user profile
-      const finalRead = await this.getUserProfile(authUser.id)
-      return { user: finalRead.user, error: finalRead.error }
     } catch (error: any) {
       console.error('ensureUserRecord failed:', error)
-      // If insert fails due to duplicate (race), try to read again
-      try {
-        const { data, error: readErr } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', authUser?.id)
-          .single()
-
-        if (readErr) throw readErr
-        return { user: data as unknown as User, error: null }
-      } catch (e: any) {
-        return { user: null, error: e?.message || error?.message || 'Failed to ensure user record' }
-      }
+      return { user: null, error: error?.message || 'Failed to ensure user record' }
     }
   }
   // Sign in with Google

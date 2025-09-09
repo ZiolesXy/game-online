@@ -68,8 +68,8 @@ export function AuthCallback() {
             
             if (sessionData.session) {
               console.log('AuthCallback: Session created successfully')
-              // Reload the page to let AuthContext pick up the new session
-              window.location.href = '/'
+              // Let AuthContext pick up the new session via router navigation
+              navigate('/')
               return
             }
           }
@@ -96,7 +96,7 @@ export function AuthCallback() {
               console.error('AuthCallback: setSession from hash failed:', setErr)
             } else if (setData.session) {
               console.log('AuthCallback: Session set from hash successfully')
-              window.location.href = '/'
+              navigate('/')
               return
             }
           }

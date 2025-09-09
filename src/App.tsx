@@ -16,7 +16,15 @@ function AppContent() {
   const [showDashboard, setShowDashboard] = useState(false);
 
   // Detect special case: Google account unregistered -> force show Auth page
-  const params = new URLSearchParams(location.search);
+  // With HashRouter, location.search can be empty; fallback to parse from hash fragment
+  let params = new URLSearchParams(location.search);
+  if (![...params.keys()].length && typeof (location as any).hash === 'string') {
+    const hashStr = ((location as any).hash as string) || '';
+    const qIndex = hashStr.indexOf('?');
+    if (qIndex >= 0) {
+      params = new URLSearchParams(hashStr.slice(qIndex));
+    }
+  }
   const flag = params.get('google_unregistered');
   const navState = (location as any).state as { googleUnregistered?: boolean } | null;
   let forceAuth = flag === '1' || !!navState?.googleUnregistered;
