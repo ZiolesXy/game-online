@@ -6,8 +6,11 @@ interface AuthContextType {
   user: any | null
   userProfile: User | null
   loading: boolean
+  needsProfileCompletion: boolean
   signUp: (email: string, password: string, username: string, fullName?: string) => Promise<{ error: string | null }>
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
+  signInWithGoogle: () => Promise<{ error: string | null }>
+  completeGoogleProfile: (profileData: { username: string, fullName?: string }) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
   updateProfile: (updates: Partial<User>) => Promise<{ error: string | null }>
 }
@@ -26,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any | null>(null)
   const [userProfile, setUserProfile] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [needsProfileCompletion, setNeedsProfileCompletion] = useState(false)
   const [profileLoaded, setProfileLoaded] = useState(false)
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false)
 
@@ -36,19 +40,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get initial user
     const getInitialUser = async () => {
       try {
+        console.log('Getting initial user...')
         const { user } = await AuthService.getCurrentUser()
         
         if (!mounted) return
         
+        console.log('Initial user result:', user ? 'User found' : 'No user')
         setUser(user)
         setLoading(false) // Set loading to false immediately after getting user
         
         if (user && !profileLoaded) {
+          console.log('Loading profile for user:', user.id)
+          // Make sure a users row exists first
+          const ensureResult = await AuthService.ensureUserRecord(user)
+          console.log('Ensure user record result:', ensureResult)
+          
           // Load profile in background without blocking the UI
           const { user: profile } = await AuthService.getUserProfile(user.id)
+          console.log('Profile loaded:', profile)
+          
           if (mounted) {
             setUserProfile(profile)
             setProfileLoaded(true)
+            
+            // Check if Google OAuth user needs profile completion
+            if (profile) {
+              const { needsCompletion } = await AuthService.checkProfileCompletion(user.id)
+              console.log('Profile completion needed:', needsCompletion)
+              setNeedsProfileCompletion(needsCompletion)
+            } else {
+              // If still no profile, force completion for Google users
+              console.log('No profile found, forcing completion')
+              setNeedsProfileCompletion(true)
+            }
           }
         }
       } catch (error) {
@@ -66,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.warn('Initial loading timeout reached, forcing loading to false')
           setLoading(false)
         }
-      }, 5000)
+      }, 2000) // Reduced timeout to 2 seconds
     }
 
     getInitialUser()
@@ -86,15 +110,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(newUser)
         
         if (newUser) {
-          // Load profile in background
+          // Ensure a profile row exists, then load profile in background
           try {
+            await AuthService.ensureUserRecord(newUser)
             const { user: profile } = await AuthService.getUserProfile(newUser.id)
             if (mounted && !isUpdatingProfile) {
               setUserProfile(profile)
               setProfileLoaded(true)
+              
+              // Check if Google OAuth user needs profile completion
+              if (profile) {
+                const { needsCompletion } = await AuthService.checkProfileCompletion(newUser.id)
+                setNeedsProfileCompletion(needsCompletion)
+              } else {
+                setNeedsProfileCompletion(true)
+              }
             }
           } catch (error) {
-            console.warn('Failed to load user profile:', error)
+            console.warn('Failed to ensure/load user profile:', error)
           }
         } else {
           setUserProfile(null)
@@ -124,6 +157,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Let LoginForm manage its own local loading state
     const { error } = await AuthService.signIn({ email, password })
     return { error }
+  }
+
+  const signInWithGoogle = async () => {
+    const { error } = await AuthService.signInWithGoogle()
+    return { error }
+  }
+
+  const completeGoogleProfile = async (profileData: { username: string, fullName?: string }) => {
+    if (!user) return { error: 'No user logged in' }
+    
+    const { user: updatedProfile, error } = await AuthService.completeGoogleProfile(user.id, profileData)
+    
+    if (error) {
+      return { error }
+    }
+    
+    if (updatedProfile) {
+      setUserProfile(updatedProfile)
+      setNeedsProfileCompletion(false)
+    }
+    
+    return { error: null }
   }
 
   const signOut = async () => {
@@ -180,8 +235,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     userProfile,
     loading,
+    needsProfileCompletion,
     signUp,
     signIn,
+    signInWithGoogle,
+    completeGoogleProfile,
     signOut,
     updateProfile
   }

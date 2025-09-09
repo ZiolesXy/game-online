@@ -1,15 +1,34 @@
 import { useState } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { AuthPage } from "./pages/AuthPage";
+import { AuthContainer } from "./components/auth/AuthContainer";
+import { AuthCallback } from "./components/auth/AuthCallback";
+import { ProfileCompletion } from "./components/auth/ProfileCompletion";
 import { Dashboard } from "./components/Dashboard";
 import Home from "./pages/Home";
 import PlayGame from "./pages/PlayGame";
 import type { Game } from "./data/game";
 
 function AppContent() {
-  const { user, userProfile, loading } = useAuth();
+  const location = useLocation();
+  const { user, userProfile, loading, needsProfileCompletion } = useAuth();
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
+
+  // Detect special case: Google account unregistered -> force show Auth page
+  const params = new URLSearchParams(location.search);
+  const flag = params.get('google_unregistered');
+  const navState = (location as any).state as { googleUnregistered?: boolean } | null;
+  let forceAuth = flag === '1' || !!navState?.googleUnregistered;
+  if (!forceAuth) {
+    try {
+      const stored = localStorage.getItem('google_unregistered');
+      if (stored === '1') {
+        forceAuth = true;
+        localStorage.removeItem('google_unregistered');
+      }
+    } catch {}
+  }
 
   if (loading) {
     return (
@@ -30,9 +49,45 @@ function AppContent() {
     );
   }
 
-  if (!user) {
-    return <AuthPage />;
-  }
+  return (
+    <Routes>
+      {/* Auth routes */}
+      <Route path="/auth" element={(!user || forceAuth) ? <AuthContainer /> : <Navigate to="/" replace />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route 
+        path="/complete-profile" 
+        element={user && needsProfileCompletion ? <ProfileCompletion /> : <Navigate to="/" replace />} 
+      />
+      
+      {/* Protected routes */}
+      <Route path="/*" element={
+        !user ? <Navigate to="/auth" replace /> :
+        user && needsProfileCompletion ? <Navigate to="/complete-profile" replace /> :
+        <GameRoutes 
+          selectedGame={selectedGame}
+          setSelectedGame={setSelectedGame}
+          showDashboard={showDashboard}
+          setShowDashboard={setShowDashboard}
+          userProfile={userProfile}
+        />
+      } />
+    </Routes>
+  );
+}
+
+function GameRoutes({ 
+  selectedGame, 
+  setSelectedGame, 
+  showDashboard, 
+  setShowDashboard, 
+  userProfile 
+}: {
+  selectedGame: Game | null;
+  setSelectedGame: (game: Game | null) => void;
+  showDashboard: boolean;
+  setShowDashboard: (show: boolean) => void;
+  userProfile: any;
+}) {
 
   if (showDashboard) {
     return (
@@ -83,8 +138,6 @@ function AppContent() {
           onBack={() => setSelectedGame(null)} 
           onOpenDashboard={() => setShowDashboard(true)}
         />
-        
-        
       </div>
     );
   }

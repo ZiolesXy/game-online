@@ -55,6 +55,160 @@ function mapAuthErrorMessage(rawMessage: string): string {
 }
 
 export class AuthService {
+  // Ensure a row exists in public.users for the authenticated user (Google/email)
+  static async ensureUserRecord(authUser?: any): Promise<{ user: User | null; error: string | null }> {
+    try {
+      // If authUser not provided, fetch current session user
+      if (!authUser) {
+        const { data: { user } } = await supabase.auth.getUser()
+        authUser = user
+      }
+
+      if (!authUser?.id) {
+        return { user: null, error: 'No authenticated user' }
+      }
+
+      // Try to fetch existing profile
+      const existing = await this.getUserProfile(authUser.id)
+      if (existing.user) {
+        return existing
+      }
+
+      // Derive basic fields from auth user metadata
+      const email: string | null = authUser.email || null
+      const rawMeta = authUser.user_metadata || {}
+      const username = (rawMeta.username as string) || (email ? (email.split('@')[0]) : null)
+      const full_name = (rawMeta.full_name as string) || (rawMeta.name as string) || null
+
+      // Generate a safe fallback username if needed
+      let safeUsername = username || (email ? email.split('@')[0] : null) || `user_${String(authUser.id).slice(0, 8)}`
+      // Ensure it's only allowed chars
+      safeUsername = String(safeUsername).toLowerCase().replace(/[^a-z0-9_]/g, '_')
+
+      // Use only basic columns that exist in original schema
+      let lastErr: any = null
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const candidate = attempt === 0 ? safeUsername : `${safeUsername}_${Math.floor(Math.random() * 10000)}`
+        
+        console.log('Attempting to insert user with basic fields:', { id: authUser.id, email, username: candidate, full_name })
+        
+        const { data, error } = await supabase
+          .from('users')
+          .upsert({
+            id: authUser.id,
+            email,
+            username: candidate,
+            full_name
+          }, { onConflict: 'id' })
+          .select()
+          .single()
+
+        if (!error) {
+          console.log('Successfully created/updated user:', data)
+          return { user: data as unknown as User, error: null }
+        }
+        
+        console.error('Insert attempt failed:', error)
+        lastErr = error
+        
+        // Continue retrying on unique violations
+        const msg = String(error.message || '').toLowerCase()
+        const code = (error as any).code
+        if (!(msg.includes('unique') || msg.includes('duplicate') || code === '23505')) {
+          break
+        }
+      }
+
+      if (lastErr) throw lastErr
+
+      // Final fallback: read back user profile
+      const finalRead = await this.getUserProfile(authUser.id)
+      return { user: finalRead.user, error: finalRead.error }
+    } catch (error: any) {
+      console.error('ensureUserRecord failed:', error)
+      // If insert fails due to duplicate (race), try to read again
+      try {
+        const { data, error: readErr } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', authUser?.id)
+          .single()
+
+        if (readErr) throw readErr
+        return { user: data as unknown as User, error: null }
+      } catch (e: any) {
+        return { user: null, error: e?.message || error?.message || 'Failed to ensure user record' }
+      }
+    }
+  }
+  // Sign in with Google
+  static async signInWithGoogle() {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        }
+      })
+
+      if (error) throw error
+
+      return { data, error: null }
+    } catch (error: any) {
+      return { data: null, error: mapAuthErrorMessage(error.message) }
+    }
+  }
+
+  // Check if profile completion is needed for Google OAuth users
+  static async checkProfileCompletion(userId: string): Promise<{ needsCompletion: boolean; error: string | null }> {
+    try {
+      const { user, error } = await this.getUserProfile(userId)
+      
+      if (error) {
+        return { needsCompletion: false, error }
+      }
+      
+      if (!user) {
+        return { needsCompletion: true, error: null }
+      }
+      
+      // For now, assume profile is complete if user exists with username
+      // We can make this more strict later when we add the profile_completed column
+      const needsCompletion = !user.username
+      
+      return { needsCompletion, error: null }
+    } catch (error: any) {
+      return { needsCompletion: false, error: error.message }
+    }
+  }
+
+  // Complete Google OAuth profile
+  static async completeGoogleProfile(userId: string, profileData: { username: string, fullName?: string }) {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .update({
+          username: profileData.username,
+          full_name: profileData.fullName || null,
+          profile_completed: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return { user: data, error: null }
+    } catch (error: any) {
+      return { user: null, error: error.message }
+    }
+  }
+
   // Check if email already exists in users table
   static async emailExists(email: string): Promise<boolean> {
     try {
@@ -150,14 +304,14 @@ export class AuthService {
     }
   }
 
-  // Get user profile
+  // Get user profile (resilient if not found)
   static async getUserProfile(userId: string): Promise<{ user: User | null, error: string | null }> {
     try {
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('id', userId)
-        .single()
+        .maybeSingle()
 
       if (error) throw error
 
