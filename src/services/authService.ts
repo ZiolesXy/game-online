@@ -147,7 +147,8 @@ export class AuthService {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          // With HashRouter, ensure redirect includes the hash route so the client handles it
+          redirectTo: `${window.location.origin}/#/auth/callback`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',

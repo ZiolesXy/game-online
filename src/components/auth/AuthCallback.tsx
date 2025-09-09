@@ -74,9 +74,16 @@ export function AuthCallback() {
             }
           }
 
-          // Some providers return tokens in URL hash (#access_token=...)
-          const hash = window.location.hash?.startsWith('#') ? window.location.hash.slice(1) : ''
-          const hashParams = new URLSearchParams(hash)
+          // Some providers return tokens in URL hash. With HashRouter, the URL can look like:
+          //   https://host/#/auth/callback#access_token=...&refresh_token=...
+          // In that case, window.location.hash becomes '#/auth/callback#access_token=...'
+          // We must parse only the trailing token fragment after the LAST '#'.
+          const rawHash = window.location.hash || ''
+          const hash = rawHash.startsWith('#') ? rawHash.slice(1) : rawHash
+          // If the hash contains another '#', take the substring after the last '#'
+          const lastHashIndex = hash.lastIndexOf('#')
+          const tokenFragment = lastHashIndex >= 0 ? hash.slice(lastHashIndex + 1) : hash
+          const hashParams = new URLSearchParams(tokenFragment)
           const access_token = hashParams.get('access_token')
           const refresh_token = hashParams.get('refresh_token')
           if (access_token && refresh_token) {
