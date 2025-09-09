@@ -116,27 +116,6 @@ export function ProfileCard() {
     }
   }
 
-  // const handleResetPassword = async () => {
-  //   if (!userProfile?.email) return
-    
-  //   setPasswordLoading(true)
-  //   setPasswordError('')
-    
-  //   const { error } = await AuthService.resetPassword(userProfile.email)
-    
-  //   if (error) {
-  //     setPasswordError(error)
-  //   } else {
-  //     setPasswordSuccess('Link reset password telah dikirim ke email Anda')
-  //     setTimeout(() => {
-  //       setShowPasswordModal(false)
-  //       setPasswordSuccess('')
-  //     }, 3000)
-  //   }
-    
-  //   setPasswordLoading(false)
-  // }
-
   useEffect(() => {
     const loadFriends = async () => {
       if (!userProfile) return
