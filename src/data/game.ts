@@ -73,7 +73,7 @@ export const games: Game[] = [
   },
   {
     id: "PA",
-    title: "PIGEON ASCENT",
+    title: "Piegon Ascent",
     description: "Inspired by games such as La Brute, Tamagochi and a little bit of Pokémon, Pigeon Ascent is our game for Ludum Dare #46. I admit that we strayed a bit from the theme, but since we had tons of fun developing this game, we're quite happy with the result :) Observation: This game was made for the Ludum Dare #46. If you want, you can play the first uploaded version here! Gameplay and controls: The mouse is used for everything. The pigeons fight by themselves, but you can choose the attribute points and which enemies your pigeon will fight.",
     file: "/PiegonAscent/index.html",
     thumbnail: "/PiegonAscent/index.icon.png",
