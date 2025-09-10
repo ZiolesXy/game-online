@@ -35,7 +35,7 @@ body {
 }
 
 .mode-btn {
-    background: linear-gradient(45deg, #2196F3, #21CBF3);
+    background: linear-gradient(45deg, #4CAF50, #45a049);
     border: none;
     color: white;
     padding: 15px 30px;
@@ -44,17 +44,23 @@ body {
     font-size: 16px;
     margin: 10px;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+    box-shadow: 0 4px 15px rgba(33, 243, 131, 0.3);
 }
 
 .mode-btn:hover {
-    transform: translateY(-2px);
+    /* transform: translateY(-2px); */
     box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
 }
 
 .mode-btn.selected {
-    background: linear-gradient(45deg, #4CAF50, #45a049);
+    background: linear-gradient(#2196F3, #21CBF3);
+    /* Force blue shadow when selected (override base green shadow) */
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
+    outline: none;
 }
+
+/* Ensure no green glow leaks on interactions for selected button */
+/* .mode-btn.selected:hover,*/
 
 .difficulty-selection {
     margin: 20px 0;
