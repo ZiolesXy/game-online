@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Catur Lengkap</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="game-container">
+        <!-- Main Menu -->
+        <div id="mainMenu" class="main-menu">
+            <h1 class="menu-title">Game Catur Lengkap</h1>
+            
+            <div class="game-mode-selection">
+                <h3>Pilih Mode Permainan:</h3>
+                <button class="mode-btn" onclick="selectMode('human')">Vs Manusia</button>
+                <button class="mode-btn" onclick="selectMode('ai')">Vs Komputer</button>
+            </div>
+            
+            <div id="difficultySelection" class="difficulty-selection">
+                <h4>Tingkat Kesulitan:</h4>
+                <button class="difficulty-btn" onclick="selectDifficulty('easy')">Mudah</button>
+                <button class="difficulty-btn" onclick="selectDifficulty('medium')">Sedang</button>
+                <button class="difficulty-btn" onclick="selectDifficulty('hard')">Sulit</button>
+            </div>
+            
+            <button class="start-btn" onclick="startGame()">Mulai Permainan</button>
+        </div>
+        
+        <!-- Game Area -->
+        <div id="gameArea" class="game-area">
+            <h1>Game Catur Lengkap</h1>
+            
+            <div class="game-info">
+                <div class="current-player">Giliran: <span id="currentPlayer">Putih</span></div>
+                <div id="gameStatus" class="status"></div>
+                <div id="aiThinking" class="ai-thinking">AI sedang berpikir...</div>
+            </div>
+            
+            <div class="chessboard" id="chessboard"></div>
+            
+            <div class="controls">
+                <button class="btn" onclick="resetGame()">Reset Game</button>
+                <button class="btn" onclick="undoMove()">Undo Move</button>
+                <button class="btn" onclick="flipBoard()">Flip Board</button>
+                <button class="btn secondary" onclick="showMainMenu()">Menu Utama</button>
+                <button class="btn" onclick="exportPGN()">Export PGN</button>
+            </div>
+            
+            <div id="moveHistory" class="status"></div>
+            <div id="pgnExport" class="pgn-export" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <div id="promotionModal" class="promotion-modal">
+        <div class="promotion-content">
+            <h3>Pilih bidak untuk promosi:</h3>
+            <div class="promotion-pieces" id="promotionPieces"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

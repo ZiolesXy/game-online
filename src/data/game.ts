@@ -55,9 +55,10 @@ export const games: Game[] = [
     id: "CH",
     title: "Catur",
     description: "Mainkan Catur melawan teman!",
-    file: "/Chess/index.html",
-    thumbnail: "/Chess/background.jpg",
+    file: "/ChessRevamed/index.html",
+    thumbnail: "/ChessRevamed/Assets/background.jpg",
     author: "Pasha Prabasakti",
+    authorUrl : "https://github.com/ZiolesXy?tab=repositories",
     category: "Strategi",
   },
   {
