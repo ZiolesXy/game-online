@@ -42,7 +42,19 @@ let lastMove = null;
 // Game mode settings
 let gameMode = null; // 'human' or 'ai'
 let aiDifficulty = null; // 'easy', 'medium', 'hard'
+let humanPlayType = null; // 'local' or 'multiplayer'
 let humanColor = 'w'; // default human plays white
+
+// Multiplayer (Supabase Realtime Channels)
+let supabaseClient = null;
+let realtimeChannel = null;
+let isMultiplayer = false;
+let roomId = null;
+let playerColor = null; // 'w' or 'b' for multiplayer side
+const clientId = Math.random().toString(36).slice(2);
+
+// Prevent re-broadcast when applying remote move
+let isApplyingRemote = false;
 
 // PGN data
 let gameMetadata = {
@@ -62,13 +74,23 @@ function selectMode(mode) {
 
   // Show/hide difficulty selection
   const difficultyDiv = document.getElementById('difficultySelection');
+  const humanTypeDiv = document.getElementById('humanTypeSelection');
   if (mode === 'ai') {
     difficultyDiv.style.display = 'block';
+    if (humanTypeDiv) humanTypeDiv.style.display = 'none';
+    humanPlayType = null;
+    // Hide multiplayer controls if previously visible and leave any room
+    setMultiplayerControlsVisible(false);
+    if (isMultiplayer) {
+      // best-effort cleanup
+      leaveRoom();
+    }
     gameMetadata.white = 'Human';
     gameMetadata.black = 'AI';
   } else {
     difficultyDiv.style.display = 'none';
     aiDifficulty = null;
+    if (humanTypeDiv) humanTypeDiv.style.display = 'block';
     gameMetadata.white = 'Player 1';
     gameMetadata.black = 'Player 2';
   }
@@ -82,9 +104,40 @@ function selectDifficulty(difficulty) {
   if (window.event) window.event.target.classList.add('selected');
 }
 
+function selectHumanPlayType(type) {
+  humanPlayType = type; // 'local' | 'multiplayer'
+  // Update UI selection only within the human type section
+  const container = document.getElementById('humanTypeSelection');
+  if (container) {
+    container.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('selected'));
+    if (window.event) window.event.target.classList.add('selected');
+  }
+
+  if (type === 'multiplayer') {
+    setMultiplayerControlsVisible(true);
+    setMultiplayerStatus('Supabase siap. Masukkan Kode Room untuk bermain.');
+  } else {
+    // Local play: ensure we are not connected to any room and hide controls
+    setMultiplayerControlsVisible(false);
+    if (isMultiplayer) {
+      leaveRoom();
+    }
+    setMultiplayerStatus('');
+    setPlayerColorStatus();
+  }
+}
+
 function startGame() {
-  if (!gameMode || (gameMode === 'ai' && !aiDifficulty)) {
-    alert('Silakan pilih mode permainan dan tingkat kesulitan!');
+  if (!gameMode) {
+    alert('Silakan pilih mode permainan!');
+    return;
+  }
+  if (gameMode === 'ai' && !aiDifficulty) {
+    alert('Silakan pilih tingkat kesulitan untuk Vs Komputer!');
+    return;
+  }
+  if (gameMode === 'human' && !humanPlayType) {
+    alert('Silakan pilih jenis permainan Vs Manusia: Local atau Multiplayer!');
     return;
   }
 
@@ -93,12 +146,29 @@ function startGame() {
 
   resetGameState();
   createBoard();
-  
+  // Apply multiplayer UI visibility based on selection
+  if (gameMode === 'human') {
+    if (humanPlayType === 'multiplayer') {
+      setMultiplayerControlsVisible(true);
+      setMultiplayerStatus('Masukkan Kode Room lalu "Buat Room" atau "Gabung Room".');
+    } else {
+      setMultiplayerControlsVisible(false);
+      if (isMultiplayer) leaveRoom();
+    }
+  } else {
+    setMultiplayerControlsVisible(false);
+    if (isMultiplayer) leaveRoom();
+  }
 }
 
 function showMainMenu() {
   document.getElementById('gameArea').style.display = 'none';
   document.getElementById('mainMenu').style.display = 'block';
+  // Cleanup multiplayer state when returning to menu
+  setMultiplayerControlsVisible(false);
+  if (isMultiplayer) {
+    leaveRoom();
+  }
 }
 
 function createBoard() {
@@ -165,7 +235,12 @@ function flipBoard() {
 function handleSquareClick(row, col) {
   if (gameOver) return;
 
-  if (gameMode === 'ai' && currentPlayer !== humanColor) return;
+  if (isMultiplayer) {
+    if (!playerColor) return;
+    if (currentPlayer !== playerColor) return; // hanya bisa jalan saat giliran sendiri
+  } else if (gameMode === 'ai' && currentPlayer !== humanColor) {
+    return;
+  }
 
   const piece = board[row][col];
 
@@ -426,7 +501,11 @@ function completeMove(moveData) {
   createBoard();
   checkGameEnd();
   updateMoveHistory();
-  if (gameMode === 'ai' && currentPlayer !== humanColor && !gameOver) {
+  // Broadcast move to opponent in multiplayer
+  if (isMultiplayer && realtimeChannel && !isApplyingRemote) {
+    broadcastMove(moveData);
+  }
+  if (!isMultiplayer && gameMode === 'ai' && currentPlayer !== humanColor && !gameOver) {
     makeAIMove();
   }
 }
@@ -854,4 +933,192 @@ function undoMove() {
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('mainMenu').style.display = 'block';
   document.getElementById('gameArea').style.display = 'none';
+  initSupabase();
+  setMultiplayerControlsVisible(false);
 });
+
+// ==========================
+// Supabase Multiplayer (Quick Start)
+// ==========================
+
+function initSupabase() {
+  try {
+    const cfg = window.CHESS_CONFIG || {};
+    if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+      setMultiplayerStatus('Supabase belum dikonfigurasi. Isi URL dan anon key di config.js', true);
+      return;
+    }
+    // global supabase from CDN v2
+    supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    setMultiplayerStatus('Supabase siap. Masukkan Kode Room untuk bermain.', false);
+  } catch (e) {
+    console.error('Supabase init error', e);
+    setMultiplayerStatus('Gagal inisialisasi Supabase', true);
+  }
+}
+
+function setMultiplayerStatus(text, isError = false) {
+  const el = document.getElementById('multiplayerStatus');
+  if (!el) return;
+  el.textContent = text || '';
+  el.style.color = isError ? '#e53935' : '#666';
+}
+
+function setMultiplayerControlsVisible(visible) {
+  const el = document.getElementById('multiplayerControls');
+  if (!el) return;
+  el.style.display = visible ? 'flex' : 'none';
+}
+
+function setPlayerColorStatus() {
+  const el = document.getElementById('playerColorStatus');
+  if (!el) return;
+  if (isMultiplayer && playerColor) {
+    const colorText = playerColor === 'w' ? 'Putih' : 'Hitam';
+    el.textContent = `Anda bermain sebagai: ${colorText}. Room: ${roomId}`;
+  } else {
+    el.textContent = '';
+  }
+}
+
+function getRoomInput() {
+  const input = document.getElementById('roomCodeInput');
+  const code = (input?.value || '').trim().toUpperCase();
+  return code;
+}
+
+function randomRoomCode(len = 6) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s = '';
+  for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+}
+
+async function createRoom() {
+  if (!supabaseClient) return setMultiplayerStatus('Supabase belum siap', true);
+  if (gameMode === 'ai') return setMultiplayerStatus('Nonaktifkan mode AI untuk multiplayer', true);
+  if (isMultiplayer) await leaveRoom();
+  roomId = getRoomInput() || randomRoomCode();
+  isMultiplayer = true;
+  playerColor = 'w';
+  humanColor = 'w';
+  connectToRoom(roomId);
+  setMultiplayerStatus(`Room dibuat: ${roomId}. Tunggu lawan bergabung...`);
+  setPlayerColorStatus();
+}
+
+async function joinRoom() {
+  if (!supabaseClient) return setMultiplayerStatus('Supabase belum siap', true);
+  if (gameMode === 'ai') return setMultiplayerStatus('Nonaktifkan mode AI untuk multiplayer', true);
+  const code = getRoomInput();
+  if (!code) return setMultiplayerStatus('Masukkan Kode Room untuk bergabung', true);
+  if (isMultiplayer) await leaveRoom();
+  roomId = code;
+  isMultiplayer = true;
+  playerColor = 'b';
+  humanColor = 'w'; // tidak dipakai pada multiplayer, tapi biarkan default
+  connectToRoom(roomId);
+  setMultiplayerStatus(`Bergabung ke room: ${roomId}.`);
+  setPlayerColorStatus();
+}
+
+async function leaveRoom() {
+  try {
+    if (realtimeChannel) {
+      await realtimeChannel.unsubscribe();
+      realtimeChannel = null;
+    }
+  } catch {}
+  isMultiplayer = false;
+  roomId = null;
+  playerColor = null;
+  setMultiplayerStatus('Keluar dari room.');
+  setPlayerColorStatus();
+}
+
+function connectToRoom(code) {
+  if (!supabaseClient) return;
+  const topic = `chess:${code}`;
+  realtimeChannel = supabaseClient.channel(topic, {
+    config: {
+      presence: { key: clientId }
+    }
+  });
+
+  realtimeChannel
+    .on('presence', { event: 'sync' }, () => {
+      const state = realtimeChannel.presenceState();
+      const peers = Object.keys(state || {});
+      if (peers.length < 2) {
+        setMultiplayerStatus(`Menunggu lawan... (${peers.length}/2)`);
+      } else {
+        setMultiplayerStatus('Lawan terhubung. Selamat bermain!');
+      }
+    })
+    .on('broadcast', { event: 'move' }, (payload) => {
+      const { fromClient, move } = payload.payload || {};
+      if (!move || fromClient === clientId) return; // ignore own echoes
+      applyRemoteMove(move);
+    })
+    .subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        // track presence
+        await realtimeChannel.track({ clientId, joinedAt: Date.now() });
+      }
+    });
+}
+
+function broadcastMove(moveData) {
+  try {
+    if (!realtimeChannel) return;
+    const payload = serializeMove(moveData);
+    realtimeChannel.send({ type: 'broadcast', event: 'move', payload: { fromClient: clientId, move: payload } });
+  } catch (e) {
+    console.error('Broadcast move error', e);
+  }
+}
+
+function serializeMove(moveData) {
+  const { from, to, piece, capturedPiece, castling, enPassant } = moveData;
+  return { from, to, piece, capturedPiece: capturedPiece || null, castling: castling || null, enPassant: enPassant || null };
+}
+
+function applyRemoteMove(serialized) {
+  // Apply the same mechanics as makeMove/completeMove, but without rebroadcast
+  const { from, to, piece, capturedPiece, castling, enPassant } = serialized;
+  isApplyingRemote = true;
+
+  const moveData = {
+    from: { ...from },
+    to: { ...to },
+    piece,
+    capturedPiece: capturedPiece || board[to.row][to.col] || '',
+    castlingRights: { ...castlingRights },
+    enPassantTarget: enPassantTarget ? { ...enPassantTarget } : null
+  };
+
+  // Handle special captures (en passant)
+  if (piece[1] === 'P' && enPassant && to.row === enPassant.row && to.col === enPassant.col) {
+    const capturedPawnRow = piece[0] === 'w' ? to.row + 1 : to.row - 1;
+    board[capturedPawnRow][to.col] = '';
+    moveData.enPassant = { row: capturedPawnRow, col: to.col };
+  }
+
+  // Handle castling
+  if (piece[1] === 'K' && castling && typeof castling.rookFromCol === 'number') {
+    const isKingside = castling.isKingside;
+    const rookFromCol = castling.rookFromCol;
+    const rookToCol = castling.rookToCol;
+    board[to.row][rookToCol] = board[from.row][rookFromCol];
+    board[from.row][rookFromCol] = '';
+    moveData.castling = { isKingside, rookFromCol, rookToCol };
+  }
+
+  // Move piece
+  board[to.row][to.col] = piece;
+  board[from.row][from.col] = '';
+
+  // Note: promotion in remote is handled as already promoted on sender side
+  completeMove(moveData);
+  isApplyingRemote = false;
+}
