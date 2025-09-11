@@ -1,3 +1,8 @@
+:root {
+    --square-size: 60px;
+    --piece-scale: 0.8; /* piece size relative to square */
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
@@ -14,7 +19,9 @@ body {
     box-shadow: 0 20px 40px rgba(0,0,0,0.15);
     padding: 30px;
     text-align: center;
-    max-width: 600px;
+    max-width: 640px;
+    width: calc(100vw - 24px);
+    box-sizing: border-box;
 }
 
 .main-menu {
@@ -143,8 +150,8 @@ body {
 }
 
 .square {
-    width: 60px;
-    height: 60px;
+    width: var(--square-size);
+    height: var(--square-size);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -205,13 +212,13 @@ body {
 }
 
 .in-check {
-    background-color: #ff5722 !important;
-    animation: checkPulse 1s infinite;
+    background-color: #e53935 !important; /* stronger red */
+    animation: checkPulse 0.9s infinite;
 }
 
 @keyframes checkPulse {
-    0%, 100% { background-color: #ff5722; }
-    50% { background-color: #ff8a65; }
+    0%, 100% { background-color: #e53935; }
+    50% { background-color: #ef5350; }
 }
 
 
@@ -363,11 +370,29 @@ body {
     white-space: pre-wrap;
 }
 
-.coordinates {
-    position: absolute;
-    font-size: 10px;
-    color: #666;
-    font-weight: bold;
+/* Responsive tweaks */
+@media (max-width: 900px) {
+    :root { --square-size: 56px; }
+}
+
+@media (max-width: 768px) {
+    :root { --square-size: 48px; }
+    .game-container { padding: 20px; }
+}
+
+@media (max-width: 560px) {
+    :root { --square-size: 44px; }
+}
+
+@media (max-width: 480px) {
+    :root { --square-size: 40px; }
+    .game-container { padding: 16px; border-radius: 12px; }
+    .menu-title { font-size: 28px; }
+    .game-info { font-size: 16px; }
+}
+
+@media (max-width: 380px) {
+    :root { --square-size: 36px; }
 }
 
 .coord-file {
@@ -381,9 +406,17 @@ body {
 }
 
 .piece-img {
-    width: 48px;
-    height: 48px;
+    width: calc(var(--square-size) * var(--piece-scale));
+    height: calc(var(--square-size) * var(--piece-scale));
     user-select: none;
     pointer-events: none;
     transition: all 0.3s ease;
+}
+
+/* Coordinates scale slightly on small squares */
+.coordinates {
+    position: absolute;
+    font-size: 10px;
+    color: #666;
+    font-weight: bold;
 }

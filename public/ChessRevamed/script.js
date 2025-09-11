@@ -229,7 +229,8 @@ function highlightPossibleMoves(row, col) {
 function clearHighlights() {
   const squares = document.querySelectorAll('.square');
   squares.forEach(square => {
-    square.classList.remove('possible-move', 'capture-move', 'in-check');
+    // Do not remove 'in-check' here; it should persist until the board state is safe.
+    square.classList.remove('possible-move', 'capture-move');
   });
 }
 
