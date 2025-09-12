@@ -5,19 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catur V2</title>
     <link rel="stylesheet" href="style.css">
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     <!-- Supabase JS v2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Generated at build time: provides window.CHESS_CONFIG -->
     <script src="config.js"></script>
-=======
->>>>>>> parent of 68a5a7c (add multiplayer mode on chess)
-=======
->>>>>>> parent of 68a5a7c (add multiplayer mode on chess)
-=======
->>>>>>> parent of 68a5a7c (add multiplayer mode on chess)
 </head>
 
 <body>
@@ -38,6 +29,12 @@
                 <button class="difficulty-btn" onclick="selectDifficulty('medium')">Sedang</button>
                 <button class="difficulty-btn" onclick="selectDifficulty('hard')">Sulit</button>
             </div>
+
+            <div id="humanTypeSelection" class="difficulty-selection" style="display:none;">
+                <h4>Jenis Permainan Vs Manusia:</h4>
+                <button class="difficulty-btn" onclick="selectHumanPlayType('local')">Local (1 perangkat)</button>
+                <button class="difficulty-btn" onclick="selectHumanPlayType('multiplayer')">Multiplayer (online)</button>
+            </div>
             
             <button class="start-btn" onclick="startGame()">Mulai Permainan</button>
         </div>
@@ -51,7 +48,17 @@
                 <div id="gameStatus" class="status"></div>
                 <div id="aiThinking" class="ai-thinking">AI sedang berpikir...</div>
             </div>
-            
+
+            <!-- Multiplayer Controls -->
+            <div class="controls" id="multiplayerControls">
+                <input id="roomCodeInput" type="text" placeholder="Kode Room (contoh: ABC123)" style="padding:8px 12px;border-radius:8px;border:1px solid #ccc;min-width:200px;" />
+                <button class="btn" onclick="createRoom()">Buat Room</button>
+                <button class="btn" onclick="joinRoom()">Gabung Room</button>
+                <button class="btn secondary" onclick="leaveRoom()">Keluar Room</button>
+            </div>
+            <div class="status" id="multiplayerStatus"></div>
+            <div class="status" id="playerColorStatus"></div>
+
             <div class="chessboard" id="chessboard"></div>
             
             <div class="controls">
