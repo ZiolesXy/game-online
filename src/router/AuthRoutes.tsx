@@ -2,7 +2,6 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { AuthContainer } from "../components/auth/AuthContainer";
 import { AuthCallback } from "../components/auth/AuthCallback";
-import { ResetPasswordPage } from "../components/auth/ResetPasswordPage";
 
 export function AuthRoutes() {
   const { user } = useAuth();
