@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { games, GAME_CATEGORIES, type GameCategory } from "../data/game";
 import GameCard from "../components/GameCard";
 
-const Home: React.FC<{ onGameSelect: (game: typeof games[0]) => void }> = ({
+const Home: React.FC<{ onGameSelect?: (game: typeof games[0]) => void }> = ({
   onGameSelect,
 }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<GameCategory>("Semua");
   const [filteredGames, setFilteredGames] = useState(games);
@@ -170,7 +172,10 @@ const Home: React.FC<{ onGameSelect: (game: typeof games[0]) => void }> = ({
                 }`}
               >
                 <div className="glass-card glass-hover rounded-3xl shadow-md hover:shadow-lg transition-shadow duration-200 group overflow-hidden">
-                  <GameCard game={game} onClick={onGameSelect} />
+                  <GameCard 
+                    game={game} 
+                    onClick={onGameSelect || ((game) => navigate(`/game/${game.id}`))} 
+                  />
                 </div>
               </div>
             ))}
