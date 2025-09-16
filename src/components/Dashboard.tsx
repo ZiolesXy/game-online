@@ -33,7 +33,7 @@ export function Dashboard() {
   return (
     <div className="min-h-screen">
       {/* Modern Header */}
-      <header className="glass-card sticky top-0 z-40 border-b border-white/10">
+      <header className="glass-card border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 py-4">
             <div className="flex items-center space-x-4 md:space-x-5 motion-safe:animate-slide-left">

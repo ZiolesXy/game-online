@@ -40,7 +40,7 @@ const Home: React.FC<{ onGameSelect?: (game: typeof games[0]) => void }> = ({
   return (
     <div className="min-h-screen">
       {/* Modern Header */}
-      <div className="glass-card sticky top-0 z-40 border-b border-white/10">
+      <div className="glass-card border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center animate-slide-up">
             <div className="flex items-center justify-center mb-6">
