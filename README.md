@@ -43,36 +43,6 @@ Tanpa ribet install aplikasi tambahan — cukup buka browser, login, dan mulai s
 
 ---
 
-## 📢 Sosial Media Promo
-
-**Instagram / TikTok**
-🎮 Mau nongkrong online bareng gamer lain?  
-Gabung di **FunZone** – tempat kamu bisa bikin profil, tambah teman, ngobrol real-time, dan jelajahi katalog game.  
-👉 Coba gratis sekarang di [fun-zone-rho.vercel.app](https://fun-zone-rho.vercel.app/)  
-
-#gaming #funzone #temanbaru #chat #gameonline  
-
----
-
-**Twitter / X**  
-Main bareng jadi lebih gampang 🎮✨  
-Temukan teman, ngobrol real-time, dan jelajahi katalog game di **FunZone**.  
-Coba gratis 👉 [fun-zone-rho.vercel.app](https://fun-zone-rho.vercel.app/) #gaming #funzone  
-
----
-
-**Facebook**  
-👾 **FunZone – Platform sosial untuk gamer!**  
-- Buat akun & profil gamer  
-- Cari dan tambah teman  
-- Chat 1-to-1 real-time  
-- Jelajahi katalog game  
-
-Semua GRATIS, tanpa ribet install aplikasi!  
-👉 Coba sekarang: [fun-zone-rho.vercel.app](https://fun-zone-rho.vercel.app/)  
-
----
-
 ## 🎤 Pitch Singkat
 
 > “FunZone adalah platform sosial gaming berbasis web yang menggabungkan fitur **komunitas (friend system + chat real-time)** dengan **katalog game**. Dibangun menggunakan teknologi modern (React + Supabase + Vercel), FunZone menawarkan **pengalaman ringan, aman, dan interaktif** langsung dari browser. Targetnya adalah gamer kasual hingga komunitas kecil yang ingin tempat praktis untuk ngobrol dan main bareng.”
