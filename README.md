@@ -43,6 +43,12 @@ Tanpa ribet install aplikasi tambahan — cukup buka browser, login, dan mulai s
 
 ---
 
+## 🧑‍💻instalasi(opsional)
+
+jika anda ingin menginstall project ini silahkan baca INSTALATION_GUIDE pada folder documentation
+
+---
+
 ## 🎤 Pitch Singkat
 
 > “FunZone adalah platform sosial gaming berbasis web yang menggabungkan fitur **komunitas (friend system + chat real-time)** dengan **katalog game**. Dibangun menggunakan teknologi modern (React + Supabase + Vercel), FunZone menawarkan **pengalaman ringan, aman, dan interaktif** langsung dari browser. Targetnya adalah gamer kasual hingga komunitas kecil yang ingin tempat praktis untuk ngobrol dan main bareng.”
