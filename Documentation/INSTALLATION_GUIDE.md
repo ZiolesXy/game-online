@@ -44,7 +44,7 @@ git --version
 
 ```bash
 # Clone repository
-git clone <repository-url>
+git clone https://github.com/ZiolesXy/game-online
 cd game-online
 
 # Atau jika menggunakan SSH
