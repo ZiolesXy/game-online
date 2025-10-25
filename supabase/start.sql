@@ -22,6 +22,10 @@ create table if not exists public.users (
   provider text default 'email',
   provider_id text,
   profile_completed boolean default true,
+  banned boolean not null default false,
+  banned_reason text,
+  banned_at timestamptz,
+  banned_by uuid references public.users(id) on delete set null,
   role text check (role in ('user','admin')) default 'user',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
@@ -61,6 +65,94 @@ create policy "Users can update their own profile" on public.users
 
 create policy "Users can insert their own profile" on public.users
   for insert with check (auth.uid() = id);
+
+-- Optional: prevent banned users from selecting others via a view/RLS adjustment (app may also enforce at auth layer)
+
+-- ===============
+-- Admin RPCs: assert_admin, ban_user, unban_user, kick_user
+-- ===============
+
+-- Helper to ensure caller is an admin
+create or replace function public.assert_admin()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not exists (
+    select 1 from public.users u
+    where u.id = auth.uid()
+      and u.role = 'admin'
+  ) then
+    raise exception 'Forbidden: admin only';
+  end if;
+end;
+$$;
+
+-- Ban user: set banned=true
+create or replace function public.ban_user(p_user_id uuid, p_reason text default null)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  perform public.assert_admin();
+  update public.users
+     set banned = true,
+         banned_reason = p_reason,
+         banned_at = now(),
+         banned_by = auth.uid(),
+         updated_at = now()
+   where id = p_user_id;
+end;
+$$;
+
+-- Unban user: set banned=false
+create or replace function public.unban_user(p_user_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  perform public.assert_admin();
+  update public.users
+     set banned = false,
+         banned_reason = null,
+         banned_at = null,
+         banned_by = null,
+         updated_at = now()
+   where id = p_user_id;
+end;
+$$;
+
+
+grant execute on function public.assert_admin() to authenticated;
+grant execute on function public.ban_user(uuid, text) to authenticated;
+grant execute on function public.unban_user(uuid) to authenticated;
+
+-- Change role RPC
+create or replace function public.set_user_role(p_user_id uuid, p_role text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  perform public.assert_admin();
+  if p_role not in ('user','admin') then
+    raise exception 'Invalid role %', p_role;
+  end if;
+  update public.users
+     set role = p_role,
+         updated_at = now()
+   where id = p_user_id;
+end;
+$$;
+
+grant execute on function public.set_user_role(uuid, text) to authenticated;
 
 -- Friends policies
 

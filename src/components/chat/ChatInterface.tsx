@@ -76,13 +76,40 @@ export function ChatInterface({ conversation, onBack }: ChatInterfaceProps) {
     setSending(true)
     setError('')
 
-    const { error } = await ChatService.sendMessage(conversation.id, newMessage.trim())
+    // Optimistically add the message
+    const tempId = `temp-${Date.now()}`
+    const optimisticMessage: MessageWithSender = {
+      id: tempId as any,
+      conversation_id: conversation.id as any,
+      sender_id: (userProfile as any)?.id,
+      content: newMessage.trim(),
+      message_type: 'text' as any,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      is_read: true as any,
+      sender: {
+        id: (userProfile as any)?.id,
+        username: (userProfile as any)?.username,
+        full_name: (userProfile as any)?.full_name,
+        avatar_url: (userProfile as any)?.avatar_url,
+      } as any,
+    }
+    setMessages((prev) => [...prev, optimisticMessage])
+    const sendingText = newMessage.trim()
+    setNewMessage('')
+
+    const { error } = await ChatService.sendMessage(conversation.id, sendingText)
     
     if (error) {
+      // Rollback optimistic update
+      setMessages((prev) => prev.filter((m) => m.id !== tempId))
       setError(error)
+      // Restore input so user can retry
+      setNewMessage(sendingText)
     } else {
-      setNewMessage('')
-      // Message will be added via real-time subscription
+      // Sync with server to replace temp message with real one
+      // The realtime subscription will also pick it up, but ensure consistency
+      await loadMessages()
     }
     
     setSending(false)

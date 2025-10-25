@@ -8,6 +8,7 @@ import { GameLayout } from "../components/GameLayout";
 
 export function GameRoutes() {
   const { userProfile } = useAuth();
+  const isAdmin = userProfile?.role === 'admin';
 
   return (
     <Routes>
@@ -41,9 +42,13 @@ export function GameRoutes() {
       <Route 
         path="/admin/*" 
         element={
-          <GameLayout userProfile={userProfile} showBackButton>
-            <AdminPage />
-          </GameLayout>
+          isAdmin ? (
+            <GameLayout userProfile={userProfile} showBackButton>
+              <AdminPage />
+            </GameLayout>
+          ) : (
+            <Navigate to="/" replace />
+          )
         } 
       />
       

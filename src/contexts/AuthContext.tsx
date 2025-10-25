@@ -61,6 +61,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (mounted) {
             setUserProfile(profile)
             setProfileLoaded(true)
+            // If user is banned, inform and sign out
+            if ((profile as any)?.banned) {
+              const reason = (profile as any)?.banned_reason
+              try { alert(`Akun anda dibanned.${reason ? `\nAlasan: ${reason}` : ''}`) } catch {}
+              await AuthService.signOut()
+              setUser(null)
+              setUserProfile(null)
+            }
           }
         }
       } catch (error) {
@@ -105,6 +113,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (mounted && !isUpdatingProfile) {
               setUserProfile(profile)
               setProfileLoaded(true)
+              if ((profile as any)?.banned) {
+                const reason = (profile as any)?.banned_reason
+                try { alert(`Akun anda dibanned.${reason ? `\nAlasan: ${reason}` : ''}`) } catch {}
+                await AuthService.signOut()
+                setUser(null)
+                setUserProfile(null)
+              }
             }
           } catch (error) {
             console.warn('Failed to ensure/load user profile:', error)

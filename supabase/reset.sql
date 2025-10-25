@@ -95,6 +95,11 @@ drop function if exists public.generate_unique_username(text) cascade;
 drop function if exists public.handle_updated_at() cascade;
 drop function if exists public.handle_games_updated_at() cascade;
 drop function if exists public.update_conversation_last_message() cascade;
+drop function if exists public.assert_admin() cascade;
+drop function if exists public.ban_user(uuid) cascade;
+drop function if exists public.unban_user(uuid) cascade;
+drop function if exists public.kick_user(uuid) cascade;
+drop function if exists public.set_user_role(uuid, text) cascade;
 
 -- Clean up any remaining auth users (CAREFUL: This deletes all user accounts!)
 -- Uncomment the next line only if you want to completely reset authentication
