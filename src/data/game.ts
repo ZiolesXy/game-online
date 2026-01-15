@@ -58,7 +58,7 @@ export const games: Game[] = [
     file: "/ChessRevamed/index.html",
     thumbnail: "/ChessRevamed/Assets/background.jpg",
     author: "Pasha Prabasakti",
-    authorUrl : "https://github.com/ZiolesXy?tab=repositories",
+    authorUrl : "https://github.com/ZiolesXy",
     category: "Strategi",
   },
   {
@@ -79,6 +79,16 @@ export const games: Game[] = [
     thumbnail: "/PiegonAscent/index.icon.png",
     author: "escada-games",
     authorUrl: "https://escada-games.itch.io/",
+    category: "Aksi",
+  },
+  {
+    id: "AOV",
+    title: "Arena Of Fate",
+    description: "Sebuah permainan RPG turn-based battle yang menampilkan mekanik pertarungan mendalam dengan sistem skill, item, statistik karakter, dan animasi efek visual sederhana",
+    file: "https://funzone-arena-of-fate.vercel.app/",
+    thumbnail: DEFAULT_THUMBNAIL,
+    author: "Pasha Prabasakti",
+    authorUrl: "https://github.com/ZiolesXy",
     category: "Aksi",
   },
 ];
