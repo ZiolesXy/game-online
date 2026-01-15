@@ -15,6 +15,7 @@ const PlayGame: React.FC<{ game: Game; onBack: () => void; onOpenDashboard?: () 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [iframeReloadKey, setIframeReloadKey] = useState(0);
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState<ConversationWithUser | null>(null);
@@ -28,7 +29,7 @@ const PlayGame: React.FC<{ game: Game; onBack: () => void; onOpenDashboard?: () 
   
   const onReload = () => {
     setIsLoading(true);
-    iframeRef.current?.contentWindow?.location.reload();
+    setIframeReloadKey((key) => key + 1);
   };
 
   const handleIframeLoad = () => {
@@ -43,6 +44,11 @@ const PlayGame: React.FC<{ game: Game; onBack: () => void; onOpenDashboard?: () 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
+
+  useEffect(() => {
+    setIsLoading(true);
+    setIframeReloadKey((key) => key + 1);
+  }, [game.id]);
 
   const handleStartChat = (conversation: ConversationWithUser) => {
     setSelectedConversation(conversation);
@@ -185,6 +191,7 @@ const PlayGame: React.FC<{ game: Game; onBack: () => void; onOpenDashboard?: () 
           {/* Game Frame */}
           <div className="relative overflow-hidden rounded-2xl bg-black">
             <iframe
+              key={iframeReloadKey}
               ref={iframeRef}
               src={game.file}
               title={game.title}
