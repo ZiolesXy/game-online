@@ -91,4 +91,14 @@ export const games: Game[] = [
     authorUrl: "https://github.com/ZiolesXy",
     category: "Aksi",
   },
+  {
+    id: "FR",
+    title: "Fun Runner",
+    description: "Race through the vibrant FunZone cosmos in this high-speed arcade runner.",
+    file: "https://funzone-fun-runner.vercel.app/",
+    thumbnail: "/Assets/Fun Runner.jpeg",
+    author: "Pasha Prabasakti",
+    authorUrl: "https://github.com/ZiolesXy",
+    category: "Aksi",
+  },
 ];
