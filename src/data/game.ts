@@ -99,6 +99,6 @@ export const games: Game[] = [
     thumbnail: "/Assets/Fun Runner.jpeg",
     author: "Pasha Prabasakti",
     authorUrl: "https://github.com/ZiolesXy",
-    category: "Aksi",
+    category: "Arcade",
   },
 ];
