@@ -109,6 +109,6 @@ export const games: Game[] = [
     thumbnail: "/DreamBound/thumbnail.svg",
     author: "Pasha Prabasakti",
     authorUrl: "https://github.com/ZiolesXy",
-    category: "Arcade",
+    category: "Strategi",
   },
 ];
