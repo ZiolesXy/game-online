@@ -101,4 +101,14 @@ export const games: Game[] = [
     authorUrl: "https://github.com/ZiolesXy",
     category: "Arcade",
   },
+  {
+    id: "DB",
+    title: "Dream Bound",
+    description: "A surreal exploration game where the world morphs based on your sanity and memory fragments.",
+    file: "https://funzone-dream-bound.vercel.app/",
+    thumbnail: "/DreamBound/thumbnail.svg",
+    author: "Pasha Prabasakti",
+    authorUrl: "https://github.com/ZiolesXy",
+    category: "Arcade",
+  },
 ];

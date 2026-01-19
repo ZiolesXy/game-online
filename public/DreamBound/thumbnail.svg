@@ -1,0 +1,53 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bgGradient" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#050505;stop-opacity:1" />
+    </radialGradient>
+    <filter id="glitch">
+      <feOffset in="SourceGraphic" dx="4" dy="0" result="off1" />
+      <feColorMatrix in="off1" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" result="blue" />
+      <feOffset in="SourceGraphic" dx="-4" dy="0" result="off2" />
+      <feColorMatrix in="off2" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="red" />
+      <feBlend in="red" in2="blue" mode="screen" />
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="url(#bgGradient)" />
+
+  <!-- Subtle Grid Lines -->
+  <g stroke="#ffffff" stroke-width="1" opacity="0.05">
+    <path d="M0 256 L1024 256 M0 512 L1024 512 M0 768 L1024 768" />
+    <path d="M256 0 L256 1024 M512 0 L512 1024 M768 0 L768 1024" />
+  </g>
+
+  <!-- Floating Memory Fragments -->
+  <g opacity="0.5">
+    <rect x="150" y="200" width="60" height="60" fill="#fbbf24" transform="rotate(15, 180, 230)" filter="url(#glow)" />
+    <rect x="800" y="150" width="40" height="40" fill="#fbbf24" transform="rotate(-10, 820, 170)" filter="url(#glow)" />
+    <polygon points="200,800 240,860 160,860" fill="#fbbf24" filter="url(#glow)" />
+    <circle cx="850" cy="750" r="25" fill="#fbbf24" filter="url(#glow)" />
+  </g>
+
+  <!-- Player Orb -->
+  <circle cx="512" cy="450" r="80" fill="white" filter="url(#glow)" />
+  <circle cx="512" cy="450" r="50" fill="white" opacity="0.4">
+    <animate attributeName="r" values="50;75;50" dur="3s" repeatCount="indefinite" />
+  </circle>
+
+  <!-- Title Text -->
+  <text x="50%" y="820" font-family="Inter, sans-serif" font-size="90" font-weight="100" fill="white" text-anchor="middle" letter-spacing="20" filter="url(#glitch)">
+    DREAMBOUND
+  </text>
+  <text x="50%" y="890" font-family="monospace" font-size="20" fill="#94a3b8" text-anchor="middle" letter-spacing="8" opacity="0.6">
+    THE SHIFTING VOID
+  </text>
+  
+  <!-- Vignette -->
+  <rect width="1024" height="1024" fill="none" stroke="black" stroke-width="150" opacity="0.4" filter="blur(80px)" />
+</svg>
