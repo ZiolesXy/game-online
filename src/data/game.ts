@@ -111,4 +111,14 @@ export const games: Game[] = [
     authorUrl: "https://github.com/ZiolesXy",
     category: "Strategi",
   },
+  {
+    id: "FC",
+    title: "Fun Chees",
+    description: "Sebuah versi tingkatan dari game catur yang sebelumnya",
+    file: "https://funzone-funchees.vercel.app/",
+    thumbnail: "/Assets/Fun Chees.svg",
+    author: "Pasha Prabasakti",
+    authorUrl: "https://github.com/ZiolesXy",
+    category: "Strategi",
+  },
 ];
