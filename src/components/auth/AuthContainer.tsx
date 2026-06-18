@@ -15,24 +15,17 @@ export function AuthContainer() {
   const { user } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
-  const isPasswordRecovery = location.pathname === '/auth/reset-password'
+  const isPasswordRecovery = location.pathname === '/login/reset-password'
   const [authMode, setAuthMode] = useState<AuthMode>('selector')
   const [emailAuthMode, setEmailAuthMode] = useState<EmailAuthMode>('login')
   const [googleUnregistered, setGoogleUnregistered] = useState(false)
   const [oauthError, setOauthError] = useState<string | null>(null)
+  const redirectTarget = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/home'
 
   // Detect redirect flag when Google account is not registered in DB
   useEffect(() => {
-    // With HashRouter, rely on React Router's location.search.
-    // Fallback: if empty, parse query from the hash fragment (e.g., '#/auth?google_unregistered=1').
+    // With BrowserRouter, rely on React Router's location.search.
     let params = new URLSearchParams(location.search)
-    if (![...params.keys()].length && typeof location.hash === 'string') {
-      const hashStr = (location.hash as unknown as string) || ''
-      const qIndex = hashStr.indexOf('?')
-      if (qIndex >= 0) {
-        params = new URLSearchParams(hashStr.slice(qIndex))
-      }
-    }
     // Capture generic OAuth error if present
     const errorCode = params.get('error') || params.get('error_code')
     const errorDesc = params.get('error_description')
@@ -40,7 +33,7 @@ export function AuthContainer() {
       const nice = errorDesc ? decodeURIComponent(errorDesc) : 'Autentikasi gagal. Coba lagi.'
       setOauthError(nice.replace(/\+/g, ' '))
       // Clean error params from URL
-      navigate('/auth', { replace: true })
+      navigate('/login', { replace: true })
     }
     const flag = params.get('google_unregistered')
     const navState = (location as any).state as { googleUnregistered?: boolean } | null
@@ -66,20 +59,19 @@ export function AuthContainer() {
       setEmailAuthMode('register')
       // Clean the URL if needed
       if (flag === '1') {
-        // In HashRouter, use navigate replace to remove the query param safely
-        navigate('/auth', { replace: true })
+        navigate('/login', { replace: true })
       }
     }
 
     // Check if we're on the reset password route
-    if (location.pathname === '/auth/reset-password') {
+    if (location.pathname === '/login/reset-password') {
       setAuthMode('update-password')
     }
   }, [location.search, location.state, location.pathname, navigate])
 
   // Removed legacy reset-password event listener (no longer triggered from LoginForm)
 
-  // Apply recovery session when landing on /auth/reset-password (HashRouter tokens)
+  // Apply recovery session when landing on /login/reset-password.
   useEffect(() => {
     if (!isPasswordRecovery) return
     let mounted = true
@@ -96,6 +88,12 @@ export function AuthContainer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPasswordRecovery])
 
+  useEffect(() => {
+    if (user && !isPasswordRecovery) {
+      navigate(redirectTarget, { replace: true })
+    }
+  }, [user, isPasswordRecovery, navigate, redirectTarget])
+
   // PRIORITY: Password recovery flow must render regardless of auth/profile state
   if (isPasswordRecovery) {
     return (
@@ -107,11 +105,6 @@ export function AuthContainer() {
         </div>
       </div>
     )
-  }
-
-  // If user is logged in, this component shouldn't render
-  if (user) {
-    return null
   }
 
   const handleSelectEmailAuth = () => {
@@ -140,7 +133,7 @@ export function AuthContainer() {
 
   // Use function declaration to ensure availability before usage
   function handlePasswordUpdateSuccess() {
-    navigate('/auth')
+    navigate(redirectTarget, { replace: true })
     setAuthMode('email-auth')
     setEmailAuthMode('login')
   }

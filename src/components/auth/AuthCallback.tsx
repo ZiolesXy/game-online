@@ -19,7 +19,7 @@ export function AuthCallback() {
         if (error) {
           console.error('Auth callback error:', error)
           setErrorMsg(error.message || 'Callback failed')
-          navigate('/auth?error=callback_failed')
+          navigate('/login?error=callback_failed')
           return
         }
 
@@ -33,13 +33,13 @@ export function AuthCallback() {
             console.log('AuthCallback: Google account not registered in DB, signing out and redirecting to email registration')
             await supabase.auth.signOut()
             try { localStorage.setItem('google_unregistered', '1') } catch {}
-            navigate('/auth?google_unregistered=1', { state: { googleUnregistered: true } })
+            navigate('/login?google_unregistered=1', { state: { googleUnregistered: true } })
             return
           }
 
-          // Successfully authenticated, redirect to home
-          console.log('AuthCallback: Redirecting to home')
-          navigate('/')
+          // Successfully authenticated, redirect to the main app area
+          console.log('AuthCallback: Redirecting to main menu')
+          navigate('/home', { replace: true })
         } else {
           // No session found, try to handle the OAuth callback
           console.log('AuthCallback: No session found, checking URL for OAuth params')
@@ -53,21 +53,20 @@ export function AuthCallback() {
             if (sessionError) {
               console.error('AuthCallback: Code exchange failed:', sessionError)
               setErrorMsg('Gagal menukar kode OAuth')
-              navigate('/auth?error=code_exchange_failed')
+              navigate('/login?error=code_exchange_failed')
               return
             }
             
             if (sessionData.session) {
               console.log('AuthCallback: Session created successfully')
-              // Let AuthContext pick up the new session via router navigation
-              navigate('/')
+              navigate('/home', { replace: true })
               return
             }
           }
 
-          // Some providers return tokens in URL hash. With HashRouter, the URL can look like:
-          //   https://host/#/auth/callback#access_token=...&refresh_token=...
-          // In that case, window.location.hash becomes '#/auth/callback#access_token=...'
+          // Some providers return tokens in URL hash. With BrowserRouter, the URL can look like:
+          //   https://host/login/callback#access_token=...&refresh_token=...
+          // In that case, window.location.hash becomes '#access_token=...'
           // We must parse only the trailing token fragment after the LAST '#'.
           const rawHash = window.location.hash || ''
           const hash = rawHash.startsWith('#') ? rawHash.slice(1) : rawHash
@@ -87,19 +86,19 @@ export function AuthCallback() {
               console.error('AuthCallback: setSession from hash failed:', setErr)
             } else if (setData.session) {
               console.log('AuthCallback: Session set from hash successfully')
-              navigate('/')
+              navigate('/home', { replace: true })
               return
             }
           }
           
-          console.log('AuthCallback: No session and no code, redirecting to auth with unregistered flag')
+          console.log('AuthCallback: No session and no code, redirecting to login with unregistered flag')
           try { localStorage.setItem('google_unregistered', '1') } catch {}
-          navigate('/auth?google_unregistered=1', { state: { googleUnregistered: true } })
+          navigate('/login?google_unregistered=1', { state: { googleUnregistered: true } })
         }
       } catch (error) {
         console.error('Auth callback exception:', error)
         setErrorMsg('Terjadi kesalahan saat memproses login Google')
-        navigate('/auth?error=callback_failed')
+        navigate('/login?error=callback_failed')
       }
     }
 

@@ -51,7 +51,7 @@ export function ResetPasswordPage() {
       } else {
         // Show success message and redirect
         alert('Link reset password telah dikirim ke email Anda. Silakan cek email dan ikuti instruksi untuk menyelesaikan reset password.')
-        navigate('/auth')
+        navigate('/login')
       }
     } catch (err: any) {
       setError(err.message || 'Gagal mengirim link reset password')
@@ -73,7 +73,7 @@ export function ResetPasswordPage() {
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
           {/* Back Button */}
           <button
-            onClick={() => navigate('/auth')}
+            onClick={() => navigate('/login')}
             className="mb-6 flex items-center text-white/70 hover:text-white transition-colors"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

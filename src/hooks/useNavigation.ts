@@ -21,7 +21,7 @@ export function useNavigation() {
   }, [navigate]);
 
   const navigateToAuth = useCallback((mode?: string) => {
-    navigate(`/auth${mode ? `/${mode}` : ''}`);
+    navigate(`/login${mode ? `/${mode}` : ''}`);
   }, [navigate]);
 
   const goBack = useCallback(() => {

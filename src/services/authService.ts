@@ -123,8 +123,7 @@ export class AuthService {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          // With HashRouter, ensure redirect includes the hash route so the client handles it
-          redirectTo: `${window.location.origin}/#/auth/callback`,
+          redirectTo: `${window.location.origin}/login/callback`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -276,7 +275,7 @@ export class AuthService {
   static async resetPassword(email: string) {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/#/auth/reset-password`
+        redirectTo: `${window.location.origin}/login/reset-password`
       })
 
       if (error) throw error
@@ -309,8 +308,8 @@ export class AuthService {
     })
   }
 
-  // Apply recovery session from URL when using HashRouter
-  // Example URL: https://app/#/auth/reset-password#access_token=...&refresh_token=...&type=recovery
+  // Apply recovery session from URL for browser-based password recovery routes.
+  // Example URL: https://app/login/reset-password#access_token=...&refresh_token=...&type=recovery
   static async applyRecoverySessionFromUrl(): Promise<{ applied: boolean; error: string | null }> {
     try {
       if (typeof window === 'undefined') return { applied: false, error: null }
@@ -335,9 +334,9 @@ export class AuthService {
         return { applied: false, error: error.message }
       }
 
-      // Clean up sensitive tokens from URL (preserve the route hash)
+      // Clean up sensitive tokens from URL.
       try {
-        const base = fullHash.substring(0, lastIdx) // keep '#/auth/reset-password'
+        const base = fullHash.substring(0, lastIdx)
         window.location.replace(window.location.pathname + window.location.search + base)
       } catch {}
 
@@ -347,4 +346,3 @@ export class AuthService {
     }
   }
 }
-
